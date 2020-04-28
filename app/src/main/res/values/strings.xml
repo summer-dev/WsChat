@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name"><b>S</b>/<u>u</u>\\<b>N</b></string>
+    <string-array name="msgs">
+        <item>When multiple bindings are available on the class path, select one and only one binding you wish to use, and remove the other bindings. For example, if you have both slf4j-simple-2.0.0-alpha0.jar and slf4j-nop-2.0.0-alpha0.jar on the class path and you wish to use the nop (no-operation) binding</item>
+        <item>在开发项目中，遇见要进行文件操作</item>
+        <item>我的资料</item>
+        <item>Teams. for Work. Stack Overflow for Teams is a private, secure spot for you and your coworkers to find and share information.</item>
+        <item>更多信息请查看说明文档</item>
+        <item>好的</item>
+    </string-array>
+    <string name="title_activity_login">Sign in</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string-array name="todolist">
+        <item>20200427兼容android15,保留所有本地聊天记录</item>
+    </string-array>
+</resources>

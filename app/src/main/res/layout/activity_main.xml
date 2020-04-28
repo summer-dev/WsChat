@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/message_all"
+        android:layout_width="match_parent"
+        android:layout_height="113dp"
+        android:text="欢迎使用SYV聊天系统\nhush\n\这是第三行" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/message_all"
+        android:layout_marginTop="446dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/newMsg"
+            android:layout_width="353dp"
+            android:layout_height="132dp"
+            android:text="@string/app_name" />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="51dp"
+        android:text="发送" />
+
+
+</RelativeLayout>

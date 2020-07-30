@@ -12,10 +12,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
+import static net.age.chat.ChatConstant.SERVER_ADDR;
+import static net.age.chat.ChatConstant.SERVER_PORT;
+import static net.age.chat.ChatConstant.SERVER_PROTOCOL;
+
 public class ChatClient{
     static final String TAG = "ChatClient";
 //    static final String serverAddr = "ws://fyh520.cn:8887";
-    static final String serverAddr = "ws://192.168.3.151:8887";
+    static final String serverAddr = SERVER_PROTOCOL + SERVER_ADDR + ":" + SERVER_PORT;//192.168.3.151:8887";
     public Draft draft;//
     public WebSocketClient cc;// = new WebSocketClient();
     public StringBuffer msg = new StringBuffer();
@@ -32,6 +36,13 @@ public class ChatClient{
             chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_CLEAR_EDIT);
         }
     }
+
+    public void send(byte[] msg){
+        if(cc.isOpen()){
+            cc.send(msg);
+            chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_SEND_MEDIA);
+        }
+    }
     public void chat(){
 
         try {
@@ -44,7 +55,7 @@ public class ChatClient{
 
                 @Override
                 public void onMessage(String s) {
-                    Log.v(TAG,s);
+                    Log.v(TAG,"message received ");
                     if(s.startsWith("org.java_websocket.WebSocketImpl")){
                         chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_OFFLINE);
                     }else if(s.startsWith("You are")){
@@ -60,6 +71,7 @@ public class ChatClient{
                 }
                 @Override
                 public void onMessage(ByteBuffer s) {
+                    Log.v(TAG,"media received ");
                     Message message = new Message();
                     message.what = ChatConstant.MESSAGE_NEW_MEDIA;
                     message.obj = s;

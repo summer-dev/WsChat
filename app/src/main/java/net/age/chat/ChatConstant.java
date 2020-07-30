@@ -14,6 +14,7 @@ public class ChatConstant {
     public static final int MESSAGE_OFFLINE = 2;//成员离线
     public static final int MESSAGE_NEW_MSG = 3;
     public static final int MESSAGE_NEW_MEDIA = 5;
+    public static final int MESSAGE_SEND_MEDIA = 6;
     public static final int MESSAGE_CLEAR_EDIT = 4; //清楚输入框
 
 
@@ -22,5 +23,8 @@ public class ChatConstant {
     public static final int USER_LOGINED = 1; //用户已经登录
 
     /*界面*/
+    public static final String SERVER_PROTOCOL = "ws://";
+    public static final String SERVER_ADDR = "192.168.3.172";
+    public static final int SERVER_PORT = 8887;
 
 }

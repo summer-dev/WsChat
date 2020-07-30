@@ -1,6 +1,8 @@
 package net.age.chat;
 
 import androidx.appcompat.app.AppCompatActivity;
+import cn.qqtheme.framework.picker.FilePicker;
+import cn.qqtheme.framework.util.StorageUtils;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +25,9 @@ import net.age.chat.model.ChatInfo;
 import net.age.chat.model.ChatUtils;
 import net.age.chat.model.FriendInfo;
 
+import org.java_websocket.server.WebSocketServer;
+
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +43,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private EditText mMsgEditEt;
     private ImageButton mMsgSendIb;
     private FrameLayout mEmojiconFl;
+    private boolean mIsSendFile = false;
+    private boolean mIsRecevFile = false;
+    private File mSendFile;
+    private String mFilePath;
+    private String mLastMessage;
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
     @Override
@@ -89,7 +99,42 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         if(!sent){
             mChatInfoList.add(chatInfo);
             mChatAdapter.setListAll(mChatInfoList);
+            mLastMessage = data;
         }
+    }
+    private void sendOld(){
+        ChatInfo chatInfo = new ChatInfo();
+        Editable editable = mMsgEditEt.getText();
+        FriendInfo friendInfo = new FriendInfo();
+        friendInfo.setOnline(true);
+        friendInfo.setFriendNickName("谷雨");
+        friendInfo.setIdentificationName("1989");
+        chatInfo.setFriendInfo(friendInfo);
+        chatInfo.setSend(true);
+        chatInfo.setSendTime(DateTime.getStringByFormat(new Date(), DateTime.DEFYMDHMS));
+
+        BaseMessage message = null;
+
+        message = new BaseMessage();
+        chatClient.send(editable.toString().trim());
+        message.setMsgType(ChatConstant.VISE_COMMAND_TYPE_TEXT);
+        message.setMsgContent(editable.toString().trim());
+        if(editable.toString().equals("mm")){
+//            chatClient.send(ChatUtils.image2byte("/sdcard/mm.jpeg"));
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    chatClient.send(ChatUtils.image2byte("/sdcard/mryy.apk"));
+//                    chatClient.send(ChatUtils.image2byte("/sdcard/mm.jpeg"));
+                }
+            }).start();
+        }
+        message.setMsgLength(editable.toString().length());
+
+        chatInfo.setMessage(message);
+
+        mChatInfoList.add(chatInfo);
+        mChatAdapter.setListAll(mChatInfoList);
     }
     private void send(){
         ChatInfo chatInfo = new ChatInfo();
@@ -105,11 +150,28 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         BaseMessage message = null;
 
         message = new BaseMessage();
-        chatClient.send(editable.toString());
+        String msg = editable.toString().trim();
+        if(mIsSendFile){
+            msg += "*#*#";
+        }
+        chatClient.send(msg);
         message.setMsgType(ChatConstant.VISE_COMMAND_TYPE_TEXT);
-        message.setMsgContent(editable.toString());
-        message.setMsgLength(editable.toString().length());
+        message.setMsgContent(msg);
 
+        if(mFilePath != null){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.v(TAG,"sendFile" + mFilePath);
+                    chatClient.send(ChatUtils.image2byte(mFilePath));
+                    mFilePath = null;
+                }
+            }).start();
+        }
+//        if(msg.equals("mm")){
+//            chatClient.send(ChatUtils.image2byte("/sdcard/mm.jpeg"));
+//        }
+        message.setMsgLength(msg.length());
         chatInfo.setMessage(message);
 
         mChatInfoList.add(chatInfo);
@@ -124,6 +186,19 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.chat_msg_add:
+                FilePicker picker = new FilePicker(ChatActivity.this, FilePicker.FILE);
+                picker.setShowHideDir(false);
+                picker.setRootPath(StorageUtils.getInternalRootPath(ChatActivity.this));
+                picker.setOnFilePickListener(new FilePicker.OnFilePickListener() {
+                    @Override
+                    public void onFilePicked(String currentPath) {
+                        mIsSendFile = true;
+                        mFilePath = currentPath;
+                        mSendFile = new File(mFilePath);
+                        mMsgEditEt.setText(mSendFile.getName());
+                    }
+                });
+                picker.show();
                 break;
             default:
                 break;
@@ -139,14 +214,15 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_NEW_MSG:
                     if(msg.obj != null){
-                        Log.v(TAG,"New Message" + msg.obj.toString());
+                        Log.v(TAG,"New Message " + msg.obj.toString());
                         if(msg.obj.toString().equals(mMsgEditEt.getText().toString())){
+                            Log.v(TAG,"Here");
                             receive(msg.obj.toString(),true);
                             mMsgEditEt.getText().clear();
                         }
                         else {
                             receive(msg.obj.toString(),false);}
-                    }
+                        }
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_NEW_MEDIA:
                     mMsgEditEt.getText().clear();
@@ -154,7 +230,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     if(msg.obj != null){
                         Log.v(TAG,"New Message" + msg.obj.toString());
                         ByteBuffer bb = (ByteBuffer)msg.obj;
-                        ChatUtils.byte2image(bb.array(),"/sdcard/kk.jpeg");
+//                        ChatUtils.byte2image(bb.array(),"/sdcard/oo.jpeg");
+                        ChatUtils.byte2image(bb.array(),"/sdcard/" + mLastMessage);
                     }
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_OFFLINE:

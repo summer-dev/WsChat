@@ -2,7 +2,6 @@ package net.age.chat;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,19 +13,17 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.vise.basebluetooth.CommandHelper;
 import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.mode.BaseMessage;
-import com.vise.basebluetooth.utils.HexUtil;
-import com.vise.common_base.utils.ToastUtil;
 import com.vise.common_utils.log.LogUtils;
 import com.vise.common_utils.utils.character.DateTime;
 
 import net.age.chat.adapter.ChatAdapter;
 import net.age.chat.model.ChatInfo;
+import net.age.chat.model.ChatUtils;
 import net.age.chat.model.FriendInfo;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -150,7 +147,15 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         else {
                             receive(msg.obj.toString(),false);}
                     }
-
+                    break;
+                case net.age.chat.ChatConstant.MESSAGE_NEW_MEDIA:
+                    mMsgEditEt.getText().clear();
+                    Log.v(TAG,"Media Arrived");
+                    if(msg.obj != null){
+                        Log.v(TAG,"New Message" + msg.obj.toString());
+                        ByteBuffer bb = (ByteBuffer)msg.obj;
+                        ChatUtils.byte2image(bb.array(),"/sdcard/kk.jpeg");
+                    }
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_OFFLINE:
                     Log.v(TAG,"Someone Left");

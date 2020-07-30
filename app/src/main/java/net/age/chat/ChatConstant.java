@@ -13,6 +13,7 @@ public class ChatConstant {
     public static final int MESSAGE_ONLINE = 1; //新成员上线
     public static final int MESSAGE_OFFLINE = 2;//成员离线
     public static final int MESSAGE_NEW_MSG = 3;
+    public static final int MESSAGE_NEW_MEDIA = 5;
     public static final int MESSAGE_CLEAR_EDIT = 4; //清楚输入框
 
 

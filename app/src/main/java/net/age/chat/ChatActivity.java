@@ -1,12 +1,18 @@
 package net.age.chat;
 
 import androidx.appcompat.app.AppCompatActivity;
-import cn.qqtheme.framework.picker.FilePicker;
-import cn.qqtheme.framework.util.StorageUtils;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +20,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.mode.BaseMessage;
@@ -25,15 +32,19 @@ import net.age.chat.model.ChatInfo;
 import net.age.chat.model.ChatUtils;
 import net.age.chat.model.FriendInfo;
 
-import org.java_websocket.server.WebSocketServer;
-
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static net.age.chat.ChatConstant.WELCOME;
+
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener{
+    // Request code for selecting a PDF document.
+    private static final int GET_CONTENT_INTENT = 1000;
+    private static final int REQUEST_FOR_ACCESS_EXTERNAL_PERMISSION = 1001;
+    private static final int REQUEST_FOR_WRITE_EXTERNAL_PERMISSION = 1002;
     static final String TAG = "ChatActivity";
     private ListView mChatMsgLv;
     private ChatAdapter mChatAdapter;
@@ -68,6 +79,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         mMsgSendIb = (ImageButton) findViewById(R.id.chat_msg_send);
         mMsgSendIb.setOnClickListener(this);
         mEmojiconFl = (FrameLayout) findViewById(R.id.chat_emojicons);
+        Toast.makeText(this,WELCOME,Toast.LENGTH_SHORT).show();
     }
 
     private void initData(){
@@ -186,22 +198,71 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.chat_msg_add:
-                FilePicker picker = new FilePicker(ChatActivity.this, FilePicker.FILE);
-                picker.setShowHideDir(false);
-                picker.setRootPath(StorageUtils.getInternalRootPath(ChatActivity.this));
-                picker.setOnFilePickListener(new FilePicker.OnFilePickListener() {
-                    @Override
-                    public void onFilePicked(String currentPath) {
-                        mIsSendFile = true;
-                        mFilePath = currentPath;
-                        mSendFile = new File(mFilePath);
-                        mMsgEditEt.setText(mSendFile.getName());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                REQUEST_FOR_ACCESS_EXTERNAL_PERMISSION);
                     }
-                });
-                picker.show();
+                }else {
+                    openFile(Uri.parse(Environment.getExternalStorageDirectory() + "/"));
+                }
                 break;
             default:
                 break;
+        }
+    }
+
+
+
+    private void openFile(Uri pickerInitialUri) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+//        intent.setType("image/jpeg");
+
+        // Optionally, specify a URI for the file that should appear in the
+        // system file picker when it loads.
+        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
+
+        startActivityForResult(intent, GET_CONTENT_INTENT);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode,
+                                 Intent resultData) {
+        if (requestCode == GET_CONTENT_INTENT
+                && resultCode == Activity.RESULT_OK) {
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            Uri uri = null;
+            // Perform operations on the document using its URI.
+            if (resultData != null) {
+                uri = resultData.getData();
+//                grantUriPermission();
+                String currentPath = ChatUtils.getPath(this,uri);
+                Log.v(TAG,"uri " + uri  + ":" + currentPath);
+
+                mIsSendFile = true;
+                mFilePath = currentPath;
+                mSendFile = new File(mFilePath);
+                mMsgEditEt.setText(mSendFile.getName());
+            }
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_FOR_ACCESS_EXTERNAL_PERMISSION){
+//            if (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (permissions[0].equals(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    &&grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                //用户同意使用write
+                openFile(Uri.parse(Environment.getExternalStorageDirectory() + "/"));
+//                startGetImageThread();
+            }else{
+                //用户不同意，自行处理即可
+                return;
+            }
         }
     }
     class ChatHandler extends Handler {
@@ -222,7 +283,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         }
                         else {
                             receive(msg.obj.toString(),false);}
-                        }
+                    }
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_NEW_MEDIA:
                     mMsgEditEt.getText().clear();

@@ -18,13 +18,25 @@ public class ChatConstant {
     public static final int MESSAGE_CLEAR_EDIT = 4; //清楚输入框
 
 
+
     /*User Login State*/
     public static final int USER_NEW = 1; //新成员注册
     public static final int USER_LOGINED = 1; //用户已经登录
 
+    public static final String APP_NAME  = "S/u\\N";
+    public static final String NICK_NAME  = "REVENGE";
+    public static final int VERSION_MAIN = 1;
+    public static final int VERSION_SUB = 4;
+    public static final String WELCOME = APP_NAME + "_" +VERSION_MAIN + "." + VERSION_SUB + "@" + NICK_NAME;
+
+
     /*界面*/
     public static final String SERVER_PROTOCOL = "ws://";
-    public static final String SERVER_ADDR = "192.168.3.172";
-    public static final int SERVER_PORT = 8887;
+//    public static final String SERVER_ADDR = "192.168.3.176";
+//    public static final int SERVER_PORT = 8887;
+
+    public static final String SERVER_ADDR = "fyh520.cn";
+    public static final int SERVER_PORT = 8888;
+
 
 }

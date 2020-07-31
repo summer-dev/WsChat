@@ -32,12 +32,9 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 import org.java_websocket.WebSocket;
-import org.java_websocket.WebSocketImpl;
-import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import java.io.File;
-import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -50,12 +47,12 @@ import static net.age.chat.ChatConstant.SERVER_PORT;
  * A simple WebSocketServer implementation. Keeps track of a "chatroom".
  */
 public class ChatServer extends WebSocketServer {
+//	public static final String SERVER_ADDR = "192.168.3.172";
+//	public static final int SERVER_PORT = 8887;
     public String mFileName;
     public static final String fileIndicator = "*#*#";
 	public ChatServer() throws UnknownHostException {
-    //super( new InetSocketAddress( port ) );
     super( new InetSocketAddress(SERVER_ADDR,SERVER_PORT) );
-//    super( new InetSocketAddress("localhost",port ) );
 	}
 
 	public ChatServer( InetSocketAddress address ) {
@@ -86,9 +83,6 @@ public class ChatServer extends WebSocketServer {
         	}else {
 				mFileName = message;
 			}
-//			System.out.println("mFileName : " + mFileName);
-//            broadcast(mFileName);
-//            System.out.println( conn + ": " + mFileName );
         }else {
 			broadcast( message );
             System.out.println( conn + ": " + message );
@@ -96,29 +90,19 @@ public class ChatServer extends WebSocketServer {
 	}
 	@Override
 	public void onMessage( WebSocket conn, ByteBuffer message ) {
-		//broadcast( message.array() );
-//		broadcast(mFileName);
-		//byte2image(message.array(),"assets/kk.jpeg");
         final ByteBuffer bb = message;
         final String name = mFileName;
         mFileName = "file";
-//        File f = new File(".");
-//        System.out.println("ff : " + f.getAbsolutePath());
         new Thread(new Runnable() {
             @Override
             public void run() {
 				System.out.println("saving to " + "assets/" + name + " -> " +bb.array().length/1024/1024 + "MB");
-//                byte2image(bb.array(),"assets/" + name);
                 broadcast(name);
-//                broadcast(image2byte("assets/" + name));
-                broadcast(bb.array());
-
-//                broadcast(mFileName);
+                byte[] array = bb.array();
+                byte2image(array,"assets/" + name);
+                broadcast(array);
             }
         }).start();
-//        System.out.println( conn + ": " + message );
-//		System.out.println( "media" );
-
 	}
 
 	
@@ -143,9 +127,6 @@ public class ChatServer extends WebSocketServer {
 		catch (IOException ex1) {
 		  ex1.printStackTrace();
 		}
-		//System.out.println("OKKKKKK");
-		//System.out.println(byte2string(data));
-		//byte2image(data,"hh.jpeg");
 		return data;
 	  } 
 	  
@@ -155,11 +136,9 @@ public class ChatServer extends WebSocketServer {
 		if(data.length>200000) return "0x";
 		StringBuffer sb = new StringBuffer();
 		int buf[] = new int[data.length];
-		//byte数组转化成十进制
 		for(int k=0;k<data.length;k++){
 		  buf[k] = data[k]<0?(data[k]+256):(data[k]);
 		}
-		//十进制转化成十六进制
 		for(int k=0;k<buf.length;k++){
 		  if(buf[k]<16) sb.append("0"+Integer.toHexString(buf[k]));
 		  else sb.append(Integer.toHexString(buf[k]));

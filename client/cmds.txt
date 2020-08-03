@@ -1,0 +1,57 @@
+https://blog.csdn.net/w47_csdn/article/details/80254459
+10.打包成可运行的jar
+[root@localhost classes]# jar -cvfe jack2.jar org.jack.demo.b.b *
+添加系统环境变量
+classpath=.;%JAVA_HOME%/lib/dt.jar;%JAVA_HOME%/lib/tools.jar;E:\Program Files\R-3.4.0\library\rJava\jri;E:\Program Files\Notepad++\;E:\OneDrive\work\guyue\jwd.jar
+1.root chat
+javac -Xlint:unchecked ChatClient.java 
+java ChatClient ws://fyh520.cn:8887 
+
+2.hello chat
+cd hello 
+javac -Xlint:unchecked ChatClient.java
+cd ..
+java hello.ChatClient ws://fyh520.cn:8887
+
+3.
+javac --Xlint:unchecked ChatClient.java
+vi man.mf
+type in:
+Manifest-Version: 1.0
+Created-By: 1.8.0_131 (Oracle Corporation)
+Main-Class: ChatClient
+
+jar -cfm cc.jar man.mf ChatClient*.class
+java -Xbootclasspath/a:jwd.jar -jar cc.jar 
+java -Xbootclasspath/a:jwd.jar;other.jar -jar cc.jar 
+
+4.
+javac -Xlint:unchecked ChatClient.java
+vi man_lib.mf
+type in:
+Manifest-Version: 1.0
+Created-By: 1.8.0_131 (Oracle Corporation)
+Main-Class: ChatClient
+Class-Path: lib/jwd.jar
+
+jar -cfm chat.jar man_lib.mf ChatClient*.class
+click chat.jar and run
+
+4.
+javac -Xlint:unchecked ChatClient.java
+vi man_lib.mf
+type in:
+Manifest-Version: 1.0
+Created-By: 1.8.0_131 (Oracle Corporation)
+Main-Class: ChatClient
+Class-Path: lib/jwd.jar
+
+jar -cfm chat.jar man_lib.mf ChatClient*.class
+click chat.jar and run
+
+5.
+javac -Xlint:unchecked ChatClient.java
+touch man_l.mf
+nl man_l.mf | sed '1a Manifest-Version: 1.0\nCreated-By: 1.8.0_131 (Oracle Corporation)\nMain-Class: ChatClient\nClass-Path: lib/jwd.jar' > mm.mf
+jar -cfm cht.jar man_l.mf ChatClient*.class
+

@@ -11,3 +11,7 @@ A mini server which implemented websocket protocol is listening request within j
 
 3.javac ChatServer.java  && java ChatServer
 
+
+#### Setting up ChatClient (PC)
+1.Configure server address and port number in ChatClient.java.
+2.Put jwd.jar within CLASS_PATH, cd client && javac -Xlint:unccdhecked ChatClient.java && java ChatClient

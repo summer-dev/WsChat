@@ -43,6 +43,18 @@ public class ChatClient{
             chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_SEND_MEDIA);
         }
     }
+    public void reconnect(){
+        if (cc.isOpen() ){
+            Log.v(TAG,"reconnect isOpen");
+            cc.reconnect();
+        }//else  if(cc.isClosed()){
+//            Log.v(TAG,"reconnect isClosed");
+//            chat();
+        else{
+            Log.v(TAG,"reconnect  chat");
+            chat();
+        }
+    }
     public void chat(){
 
         try {
@@ -55,7 +67,7 @@ public class ChatClient{
 
                 @Override
                 public void onMessage(String s) {
-                    Log.v(TAG,"message received ");
+                    Log.v(TAG,"onMessage String");
                     if(s.startsWith("org.java_websocket.WebSocketImpl")){
                         chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_OFFLINE);
                     }else if(s.startsWith("You are")){
@@ -71,7 +83,7 @@ public class ChatClient{
                 }
                 @Override
                 public void onMessage(ByteBuffer s) {
-                    Log.v(TAG,"media received ");
+                    Log.v(TAG,"onMessage ByteBuffer");
                     Message message = new Message();
                     message.what = ChatConstant.MESSAGE_NEW_MEDIA;
                     message.obj = s;
@@ -80,13 +92,11 @@ public class ChatClient{
                 }
                 @Override
                 public void onClose(int i, String s, boolean b) {
-
+                    Log.v(TAG,"onClose " + String.valueOf(i) + " " + s + " " + String.valueOf(b));
                 }
-
                 @Override
                 public void onError(Exception e) {
                     Log.v(TAG,e.getMessage());
-
                 }
             };
             cc.connect();

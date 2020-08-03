@@ -4,8 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -307,4 +312,33 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(networkReceiver);
+        super.onDestroy();
+    }
+    @Override
+    protected  void onResume() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(networkReceiver,intentFilter);
+        super.onResume();
+    }
+    BroadcastReceiver networkReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equalsIgnoreCase("android.net.conn.CONNECTIVITY_CHANGE")) {
+                NetworkInfo networkInfo =
+                        (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                if (networkInfo.isConnected()) {
+                    Log.v(TAG,"networkReceiver connected");
+                    chatClient.reconnect();
+                }
+                else {
+                    Log.v(TAG,"networkReceiver disconnected");
+                }
+            }
+//            Log.v(TAG,"networkReceiver" + intent.getDataString());
+        }
+    };
 }

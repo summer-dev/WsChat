@@ -72,6 +72,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_chat);
         initView();
         initData();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(networkReceiver,intentFilter);
         chatClient.chat();
     }
 
@@ -319,9 +322,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
     @Override
     protected  void onResume() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-        registerReceiver(networkReceiver,intentFilter);
         super.onResume();
     }
     BroadcastReceiver networkReceiver = new BroadcastReceiver() {

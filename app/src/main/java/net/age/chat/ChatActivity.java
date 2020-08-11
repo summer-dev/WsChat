@@ -48,7 +48,7 @@ import static net.age.chat.ChatConstant.WELCOME;
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener{
     // Request code for selecting a PDF document.
     private static final int GET_CONTENT_INTENT = 1000;
-    private static final int REQUEST_FOR_ACCESS_EXTERNAL_PERMISSION = 1001;
+    private static final int REQUEST_FOR_READ_EXTERNAL_PERMISSION = 1001;
     private static final int REQUEST_FOR_WRITE_EXTERNAL_PERMISSION = 1002;
     static final String TAG = "ChatActivity";
     private ListView mChatMsgLv;
@@ -66,6 +66,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private String mLastMessage;
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
+    Object mMessage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -207,10 +208,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.chat_msg_add:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                REQUEST_FOR_ACCESS_EXTERNAL_PERMISSION);
+                    int permission = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+                    if (permission == PackageManager.PERMISSION_GRANTED) {
+                        openFile(Uri.parse(Environment.getExternalStorageDirectory() + "/"));
+                    }else {
+                        requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},
+                                REQUEST_FOR_READ_EXTERNAL_PERMISSION);
                     }
                 }else {
                     openFile(Uri.parse(Environment.getExternalStorageDirectory() + "/"));
@@ -260,15 +263,23 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_FOR_ACCESS_EXTERNAL_PERMISSION){
+        if (requestCode == REQUEST_FOR_READ_EXTERNAL_PERMISSION){
 //            if (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             if (permissions[0].equals(Manifest.permission.READ_EXTERNAL_STORAGE)
                     &&grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 //用户同意使用write
                 openFile(Uri.parse(Environment.getExternalStorageDirectory() + "/"));
 //                startGetImageThread();
-            }else{
+            } else{
                 //用户不同意，自行处理即可
+                return;
+            }
+        }else if(requestCode == REQUEST_FOR_WRITE_EXTERNAL_PERMISSION){
+            if(permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                saveFile(mMessage);
+            }else {
                 return;
             }
         }
@@ -297,10 +308,18 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     mMsgEditEt.getText().clear();
                     Log.v(TAG,"Media Arrived");
                     if(msg.obj != null){
-                        Log.v(TAG,"New Message" + msg.obj.toString());
-                        ByteBuffer bb = (ByteBuffer)msg.obj;
-//                        ChatUtils.byte2image(bb.array(),"/sdcard/oo.jpeg");
-                        ChatUtils.byte2image(bb.array(),"/sdcard/" + mLastMessage);
+                        mMessage = msg.obj;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            int permission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                            if (permission == PackageManager.PERMISSION_GRANTED) {
+                                saveFile(mMessage);
+                            }else {
+                                requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                        REQUEST_FOR_WRITE_EXTERNAL_PERMISSION);
+                            }
+                        }else {
+                            saveFile(mMessage);
+                        }
                     }
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_OFFLINE:
@@ -323,6 +342,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected  void onResume() {
         super.onResume();
+    }
+    private void saveFile(Object msg){
+        ByteBuffer bb = (ByteBuffer)msg;
+        ChatUtils.byte2image(bb.array(),"/sdcard/" + mLastMessage);
     }
     BroadcastReceiver networkReceiver = new BroadcastReceiver() {
         @Override

@@ -39,6 +39,7 @@ import net.age.chat.adapter.ChatAdapter;
 import net.age.chat.model.ChatInfo;
 import net.age.chat.model.ChatUtils;
 import net.age.chat.model.FriendInfo;
+import net.age.chat.model.MyClipBoardManager;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -70,7 +71,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
     Object mMessage;
-    ClipboardManager mClipboardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +85,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView(){
-        mClipboardManager =  (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
         mChatMsgLv = (ListView) findViewById(R.id.chat_msg_show_list);
         mChatMsgLv.setOnItemLongClickListener(this);
 //        mChatMsgLv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -306,13 +305,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-        ChatUtils.androidLog();
+        ChatUtils.androidLog(null);
         switch (adapterView.getId()){
             case R.id.chat_msg_show_list:
                 ChatInfo chatInfo = (ChatInfo)adapterView.getItemAtPosition(i);
                 String clipString = chatInfo.getMessage().getMsgContent();
-                ClipData clipData = ClipData.newPlainText("text",clipString);
-                mClipboardManager.setPrimaryClip(clipData);
+                MyClipBoardManager.copyToClipboard(this,clipString);
                 Toast.makeText(this,R.string.textCopyed,Toast.LENGTH_SHORT).show();
                 break;
             default:

@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -51,7 +52,18 @@ public class ChatUtils {
 //        byte2image(data,"hh.jpeg");
         return data;
     }
-
+    public static void androidLog(String tag){
+        StackTraceElement stackTraceElement[] = (new Throwable()).getStackTrace();
+        String className = stackTraceElement[1].getClassName();
+        String methodName = stackTraceElement[1].getMethodName();
+        Log.v(methodName + " : " + tag,className);
+    }
+    public static void javaLog(){
+        StackTraceElement stackTraceElement[] = (new Throwable()).getStackTrace();
+        String className = stackTraceElement[1].getClassName();
+        String methodName = stackTraceElement[1].getMethodName();
+        System.out.println(methodName + " : " + className);
+    }
     //byte数组到16进制字符串
     public static String byte2string(byte[] data){
         if(data==null||data.length<=1) return "0x";

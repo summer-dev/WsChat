@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -21,6 +23,7 @@ import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -45,7 +48,7 @@ import java.util.List;
 
 import static net.age.chat.ChatConstant.WELCOME;
 
-public class ChatActivity extends AppCompatActivity implements View.OnClickListener{
+public class ChatActivity extends AppCompatActivity implements View.OnClickListener,AdapterView.OnItemLongClickListener {
     // Request code for selecting a PDF document.
     private static final int GET_CONTENT_INTENT = 1000;
     private static final int REQUEST_FOR_READ_EXTERNAL_PERMISSION = 1001;
@@ -67,6 +70,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
     Object mMessage;
+    ClipboardManager mClipboardManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +85,21 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView(){
+        mClipboardManager =  (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
         mChatMsgLv = (ListView) findViewById(R.id.chat_msg_show_list);
+        mChatMsgLv.setOnItemLongClickListener(this);
+//        mChatMsgLv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//            int id = mChatMsgLv.getId();
+//            @Override
+//            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                final int mm = adapterView.getId();
+//                final int mn = view.getId();
+//                ChatInfo chatInfo = (ChatInfo)mChatAdapter.getItem(i);
+//                String h = chatInfo.getMessage().getMsgContent();
+//                Log.v(TAG,h);
+//                return false;
+//            }
+//        });
         mMsgFaceIb = (ImageButton) findViewById(R.id.chat_msg_face);
         mMsgAddIb = (ImageButton) findViewById(R.id.chat_msg_add);
         mMsgAddIb.setOnClickListener(this);
@@ -284,6 +303,24 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        ChatUtils.androidLog();
+        switch (adapterView.getId()){
+            case R.id.chat_msg_show_list:
+                ChatInfo chatInfo = (ChatInfo)adapterView.getItemAtPosition(i);
+                String clipString = chatInfo.getMessage().getMsgContent();
+                ClipData clipData = ClipData.newPlainText("text",clipString);
+                mClipboardManager.setPrimaryClip(clipData);
+                Toast.makeText(this,R.string.textCopyed,Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
+
     class ChatHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {

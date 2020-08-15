@@ -96,7 +96,7 @@ public class ChatServer extends WebSocketServer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-				System.out.println("saving to " + "assets/" + name + " -> " +bb.array().length/1024/1024 + "MB");
+				System.out.println("saving to " + "assets/" + name + " -> " + bb.array().length/1024/1024 + "MB");
                 broadcast(name);
                 byte[] array = bb.array();
                 byte2image(array,"assets/" + name);

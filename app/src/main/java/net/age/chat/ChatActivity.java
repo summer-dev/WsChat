@@ -68,6 +68,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private File mSendFile;
     private String mFilePath;
     private String mLastMessage;
+    private String mLastSent;
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
     Object mMessage;
@@ -80,25 +81,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         initData();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-        registerReceiver(networkReceiver,intentFilter);
+//        registerReceiver(networkReceiver,intentFilter);
         chatClient.chat();
     }
 
     private void initView(){
         mChatMsgLv = (ListView) findViewById(R.id.chat_msg_show_list);
         mChatMsgLv.setOnItemLongClickListener(this);
-//        mChatMsgLv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            int id = mChatMsgLv.getId();
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                final int mm = adapterView.getId();
-//                final int mn = view.getId();
-//                ChatInfo chatInfo = (ChatInfo)mChatAdapter.getItem(i);
-//                String h = chatInfo.getMessage().getMsgContent();
-//                Log.v(TAG,h);
-//                return false;
-//            }
-//        });
         mMsgFaceIb = (ImageButton) findViewById(R.id.chat_msg_face);
         mMsgAddIb = (ImageButton) findViewById(R.id.chat_msg_add);
         mMsgAddIb.setOnClickListener(this);
@@ -140,40 +129,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             mChatAdapter.setListAll(mChatInfoList);
             mLastMessage = data;
         }
-    }
-    private void sendOld(){
-        ChatInfo chatInfo = new ChatInfo();
-        Editable editable = mMsgEditEt.getText();
-        FriendInfo friendInfo = new FriendInfo();
-        friendInfo.setOnline(true);
-        friendInfo.setFriendNickName("谷雨");
-        friendInfo.setIdentificationName("1989");
-        chatInfo.setFriendInfo(friendInfo);
-        chatInfo.setSend(true);
-        chatInfo.setSendTime(DateTime.getStringByFormat(new Date(), DateTime.DEFYMDHMS));
-
-        BaseMessage message = null;
-
-        message = new BaseMessage();
-        chatClient.send(editable.toString().trim());
-        message.setMsgType(ChatConstant.VISE_COMMAND_TYPE_TEXT);
-        message.setMsgContent(editable.toString().trim());
-        if(editable.toString().equals("mm")){
-//            chatClient.send(ChatUtils.image2byte("/sdcard/mm.jpeg"));
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    chatClient.send(ChatUtils.image2byte("/sdcard/mryy.apk"));
-//                    chatClient.send(ChatUtils.image2byte("/sdcard/mm.jpeg"));
-                }
-            }).start();
-        }
-        message.setMsgLength(editable.toString().length());
-
-        chatInfo.setMessage(message);
-
-        mChatInfoList.add(chatInfo);
-        mChatAdapter.setListAll(mChatInfoList);
     }
     private void send(){
         ChatInfo chatInfo = new ChatInfo();
@@ -336,7 +291,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                             mMsgEditEt.getText().clear();
                         }
                         else {
-                            receive(msg.obj.toString(),false);}
+                            receive(msg.obj.toString(),false);
+                            mMsgEditEt.getText().clear();
+                        }
+
+
                     }
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_NEW_MEDIA:
@@ -371,7 +330,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
     @Override
     protected void onDestroy(){
-        unregisterReceiver(networkReceiver);
+//        unregisterReceiver(networkReceiver);
         super.onDestroy();
     }
     @Override

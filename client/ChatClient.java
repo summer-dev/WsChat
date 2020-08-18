@@ -31,7 +31,8 @@ import java.awt.event.WindowEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-
+import java.util.Map;
+import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -123,7 +124,9 @@ public class ChatClient extends JFrame implements ActionListener {
 		} else if( e.getSource() == connect ) {
 			try {
 				// cc = new ChatClient(new URI(uriField.getText()), area, ( Draft ) draft.getSelectedItem() );
-				cc = new WebSocketClient( new URI( uriField.getText() ), (Draft) draft.getSelectedItem() ) {
+				Map<String,String> header = new HashMap<>();
+				header.put("client",System.getenv("COMPUTERNAME"));
+				cc = new WebSocketClient( new URI( uriField.getText() ), (Draft) draft.getSelectedItem(),header) {
 
 					@Override
 					public void onMessage( String message ) {

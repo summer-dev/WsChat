@@ -1,4 +1,5 @@
 package net.age.chat;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -11,15 +12,20 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
-import static net.age.chat.ChatConstant.SERVER_ADDR;
-import static net.age.chat.ChatConstant.SERVER_PORT;
+import static net.age.chat.ChatConstant.SERVER_TEST_ADDR;
+import static net.age.chat.ChatConstant.SERVER_TEST_PORT;
+import static net.age.chat.ChatConstant.SERVER_DEPLOY_ADDR;
+import static net.age.chat.ChatConstant.SERVER_DEPLOY_PORT;
 import static net.age.chat.ChatConstant.SERVER_PROTOCOL;
 
 public class ChatClient{
+    static final boolean deploy = false;
     static final String TAG = "ChatClient";
 //    static final String serverAddr = "ws://fyh520.cn:8887";
-    static final String serverAddr = SERVER_PROTOCOL + SERVER_ADDR + ":" + SERVER_PORT;//192.168.3.151:8887";
+    private String serverAddr = SERVER_PROTOCOL + SERVER_TEST_ADDR + ":" + SERVER_TEST_PORT;//192.168.3.151:8887";
     public Draft draft;//
     public WebSocketClient cc;// = new WebSocketClient();
     public StringBuffer msg = new StringBuffer();
@@ -58,8 +64,12 @@ public class ChatClient{
     public void chat(){
 
         try {
-            // cc = new ChatClient(new URI(uriField.getText()), area, ( Draft ) draft.getSelectedItem() );
-            cc = new WebSocketClient(new URI(serverAddr),draft) {
+            if(deploy){
+                serverAddr = SERVER_PROTOCOL + SERVER_DEPLOY_ADDR + ":" + SERVER_DEPLOY_PORT;
+            }
+            Map<String,String> header = new HashMap<>();
+            header.put("client",Build.DEVICE);
+            cc = new WebSocketClient(new URI(serverAddr),draft,header) {
                 @Override
                 public void onOpen(ServerHandshake serverHandshake) {
                     Log.v(TAG,"You are connected to ChatServer: " + getURI() + "\n");
@@ -77,8 +87,6 @@ public class ChatClient{
                         message.what = ChatConstant.MESSAGE_NEW_MSG;
                         message.obj = s;
                         chatHandler.sendMessage(message);
-//                        chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_NEW_MSG);
-//                        msg.append(s + "\n");
                     }
                 }
                 @Override
@@ -88,7 +96,6 @@ public class ChatClient{
                     message.what = ChatConstant.MESSAGE_NEW_MEDIA;
                     message.obj = s;
                     chatHandler.sendMessage(message);
-//                    chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_NEW_MSG);
                 }
                 @Override
                 public void onClose(int i, String s, boolean b) {

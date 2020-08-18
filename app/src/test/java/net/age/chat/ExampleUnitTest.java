@@ -3,6 +3,10 @@ package net.age.chat;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -27,5 +31,13 @@ public class ExampleUnitTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void peroperty(){
+        Map<String,String> mapp = new HashMap<>();
+        String pc = System.getenv("COMPUTERNAME");
+        Properties p = System.getProperties();
+        String m;
     }
 }

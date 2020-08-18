@@ -39,37 +39,47 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.util.Map;
+import java.util.TreeMap;
 
-import static net.age.chat.ChatConstant.SERVER_ADDR;
-import static net.age.chat.ChatConstant.SERVER_PORT;
+import static net.age.chat.ChatConstant.SERVER_DEPLOY_ADDR;
+import static net.age.chat.ChatConstant.SERVER_DEPLOY_PORT;
+import static net.age.chat.ChatConstant.SERVER_TEST_ADDR;
+import static net.age.chat.ChatConstant.SERVER_TEST_PORT;
 
 /**
  * A simple WebSocketServer implementation. Keeps track of a "chatroom".
  */
 public class ChatServer extends WebSocketServer {
-//	public static final String SERVER_ADDR = "192.168.3.172";
-//	public static final int SERVER_PORT = 8887;
     public String mFileName;
     public static final String fileIndicator = "*#*#";
-	public ChatServer() throws UnknownHostException {
-    super( new InetSocketAddress(SERVER_ADDR,SERVER_PORT) );
+    private Map<String,String> chatMembers = new TreeMap<>();
+    private boolean deploy = false;
+	public ChatServer(){
+		super(new InetSocketAddress(SERVER_TEST_ADDR, SERVER_TEST_PORT));
+		if (!deploy) {
+			new InetSocketAddress(SERVER_TEST_ADDR, SERVER_TEST_PORT);
+		} else {
+			new InetSocketAddress(SERVER_DEPLOY_ADDR, SERVER_DEPLOY_PORT);
+		}
 	}
-
-	public ChatServer( InetSocketAddress address ) {
-		super( address );
-	}
-
 	@Override
 	public void onOpen( WebSocket conn, ClientHandshake handshake ) {
 		conn.send("Welcome to the server!"); //This method sends a message to the new client
-		broadcast( "new connection: " + handshake.getResourceDescriptor() ); //This method sends a message to all clients connected
-		System.out.println( conn.getRemoteSocketAddress().getAddress().getHostAddress() + " entered the room!" );
+		String model = handshake.getFieldValue("client");
+		if (!model.equals("")){
+			broadcast( model + " entered the room!" );
+			chatMembers.put(conn.toString(),model);
+		}else {
+			System.out.println( conn.getRemoteSocketAddress().getAddress().getHostAddress() + "@" + conn +  " entered the room!" );
+		}
 	}
 
 	@Override
 	public void onClose( WebSocket conn, int code, String reason, boolean remote ) {
-		broadcast( conn + " has left the room!" );
-		System.out.println( conn + " has left the room!" );
+		String s = chatMembers.getOrDefault(conn.toString(),"Some one");
+		broadcast( s + " has left the room!" );
+		System.out.println( s + " has left the room!" );
 	}
 
 	@Override
@@ -85,7 +95,7 @@ public class ChatServer extends WebSocketServer {
 			}
         }else {
 			broadcast( message );
-            System.out.println( conn + ": " + message );
+            System.out.println( chatMembers.getOrDefault(conn.toString(),"Some one") + ": " + message );
         }
 	}
 	@Override

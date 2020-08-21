@@ -18,6 +18,7 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="textCopyed">"已复制"</string>
+    <string name="disConnect">"连接断开"</string>
     <string name="clipLabel">"clipData"</string>
     <string-array name="todolist">
         <item>20200427兼容android15,保留所有本地聊天记录</item>

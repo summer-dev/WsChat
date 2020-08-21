@@ -25,10 +25,10 @@ public class ChatConstant {
     public static final int USER_NEW = 1; //新成员注册
     public static final int USER_LOGINED = 1; //用户已经登录
 
-    public static final String APP_NAME  = "S/u\\N";
-    public static final String NICK_NAME  = "REVENGE";
+    public static final String APP_NAME  = "SuN";
+    public static final String NICK_NAME  = "LOTUS";
     public static final int VERSION_MAIN = 1;
-    public static final int VERSION_SUB = 4;
+    public static final int VERSION_SUB = 5;
     public static final String WELCOME = APP_NAME + "_" +VERSION_MAIN + "." + VERSION_SUB + "@" + NICK_NAME;
 
     public static boolean DEPLOY = false;

@@ -1,7 +1,7 @@
-https://blog.csdn.net/w47_csdn/article/details/80254459
-10.´ò°ü³É¿ÉÔËÐÐµÄjar
+ï»¿https://blog.csdn.net/w47_csdn/article/details/80254459
+10.ï¿½ï¿½ï¿½ï¿½É¿ï¿½ï¿½ï¿½ï¿½Ðµï¿½jar
 [root@localhost classes]# jar -cvfe jack2.jar org.jack.demo.b.b *
-Ìí¼ÓÏµÍ³»·¾³±äÁ¿
+ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 classpath=.;%JAVA_HOME%/lib/dt.jar;%JAVA_HOME%/lib/tools.jar;E:\Program Files\R-3.4.0\library\rJava\jri;E:\Program Files\Notepad++\;E:\OneDrive\work\guyue\jwd.jar
 1.root chat
 javac -Xlint:unchecked ChatClient.java 
@@ -55,3 +55,7 @@ touch man_l.mf
 nl man_l.mf | sed '1a Manifest-Version: 1.0\nCreated-By: 1.8.0_131 (Oracle Corporation)\nMain-Class: ChatClient\nClass-Path: lib/jwd.jar' > mm.mf
 jar -cfm cht.jar man_l.mf ChatClient*.class
 
+
+####
+javac -Xbootclasspath/a:jwd.jar -Xlint:unchecked ChatClient.java
+jar -cfm cc.jar man_lib.mf ChatClient*.classjava -Xbootclasspath/a:lib/jwd.jar ChatClient

@@ -66,10 +66,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private FrameLayout mEmojiconFl;
     private boolean mIsSendFile = false;
     private boolean mIsRecevFile = false;
-    private File mSendFile;
     private String mFilePath;
     private String mLastMessage;
-    private String mLastSent;
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
     Object mMessage;
@@ -125,9 +123,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         chatInfo.setFriendInfo(friendInfo);
 
         if(!sent){
+            mLastMessage = data;
             mChatInfoList.add(chatInfo);
             mChatAdapter.setListAll(mChatInfoList);
         }
+        mMsgEditEt.getText().clear();
+
     }
     private void send(){
         ChatInfo chatInfo = new ChatInfo();
@@ -140,13 +141,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         chatInfo.setSend(true);
         chatInfo.setSendTime(DateTime.getStringByFormat(new Date(), DateTime.DEFYMDHMS));
 
-        BaseMessage message = null;
-
-        message = new BaseMessage();
+        BaseMessage message = new BaseMessage();
         String msg = editable.toString().trim();
         if(mIsSendFile){
             mLastMessage = msg;
             msg += fileIndicator;
+            mIsSendFile = false;
         }
         chatClient.send(msg);
         message.setMsgType(ChatConstant.VISE_COMMAND_TYPE_TEXT);
@@ -158,7 +158,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 public void run() {
                     Log.v(TAG,"sendFile" + mFilePath);
                     chatClient.send(ChatUtils.image2byte(mFilePath));
-                    mFilePath = null;
                 }
             }).start();
         }
@@ -221,13 +220,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             if (resultData != null) {
                 uri = resultData.getData();
 //                grantUriPermission();
-                String currentPath = ChatUtils.getPath(this,uri);
-                Log.v(TAG,"uri " + uri  + ":" + currentPath);
-
+                mFilePath = ChatUtils.getPath(this,uri);
                 mIsSendFile = true;
-                mFilePath = currentPath;
-                mSendFile = new File(mFilePath);
-                mMsgEditEt.setText(mSendFile.getName());
+                mMsgEditEt.setText(new File(mFilePath).getName());
             }
         }
     }
@@ -285,20 +280,20 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         if(msg.obj.toString().equals(mMsgEditEt.getText().toString())){
                             Log.v(TAG,"Here true" + mLastMessage);
                             receive(msg.obj.toString(),true);
-                            mMsgEditEt.getText().clear();
                     }
                         else {
                             Log.v(TAG,"Here false" + mLastMessage);
                             receive(msg.obj.toString(),false);
-                            mMsgEditEt.getText().clear();
                         }
-
-
                     }
                     break;
                 case net.age.chat.ChatConstant.MESSAGE_NEW_MEDIA:
                     mMsgEditEt.getText().clear();
-                    Log.v(TAG,"Media Arrived");
+                    Log.v(TAG,"Media Arrived" + mLastMessage + mFilePath);
+                    if(mFilePath != null && mFilePath.contains(mLastMessage)){
+                        mFilePath = null;
+                        return;
+                    }
                     if(msg.obj != null){
                         mMessage = msg.obj;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

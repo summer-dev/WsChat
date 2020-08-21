@@ -48,7 +48,7 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class ChatClient extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -6056260699202978657L;
-
+	public static boolean deploy = true;
 	private final JTextField uriField;
 	private final JButton connect;
 	private final JButton close;
@@ -192,7 +192,12 @@ public class ChatClient extends JFrame implements ActionListener {
 			System.out.println( "Default server url specified: \'" + location + "\'" );
 		} else {
 			//location = "ws://localhost:8887";
-			location = "ws://fyh520.cn:8888";
+			if(deploy){
+				location = "ws://fyh520.cn:8888";
+//				location = "ws://132.232.7.184:8888";
+			}else {
+				location = "ws://192.168.3.160:8887";
+			}
 			System.out.println( "Default server url not specified: defaulting to \'" + location + "\'" );
 		}
 		new ChatClient( location );

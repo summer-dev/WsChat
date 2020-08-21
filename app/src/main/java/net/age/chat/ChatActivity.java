@@ -48,6 +48,7 @@ import java.util.Date;
 import java.util.List;
 
 import static net.age.chat.ChatConstant.WELCOME;
+import static net.age.chat.ChatConstant.fileIndicator;
 
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener,AdapterView.OnItemLongClickListener {
     // Request code for selecting a PDF document.
@@ -72,6 +73,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
     Object mMessage;
+    Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,10 +81,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_chat);
         initView();
         initData();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-//        registerReceiver(networkReceiver,intentFilter);
         chatClient.chat();
+        mContext = this;
     }
 
     private void initView(){
@@ -127,7 +127,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         if(!sent){
             mChatInfoList.add(chatInfo);
             mChatAdapter.setListAll(mChatInfoList);
-            mLastMessage = data;
         }
     }
     private void send(){
@@ -146,7 +145,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         message = new BaseMessage();
         String msg = editable.toString().trim();
         if(mIsSendFile){
-            msg += "*#*#";
+            mLastMessage = msg;
+            msg += fileIndicator;
         }
         chatClient.send(msg);
         message.setMsgType(ChatConstant.VISE_COMMAND_TYPE_TEXT);
@@ -162,9 +162,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }).start();
         }
-//        if(msg.equals("mm")){
-//            chatClient.send(ChatUtils.image2byte("/sdcard/mm.jpeg"));
-//        }
         message.setMsgLength(msg.length());
         chatInfo.setMessage(message);
 
@@ -286,11 +283,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     if(msg.obj != null){
                         Log.v(TAG,"New Message " + msg.obj.toString());
                         if(msg.obj.toString().equals(mMsgEditEt.getText().toString())){
-                            Log.v(TAG,"Here");
+                            Log.v(TAG,"Here true" + mLastMessage);
                             receive(msg.obj.toString(),true);
                             mMsgEditEt.getText().clear();
-                        }
+                    }
                         else {
+                            Log.v(TAG,"Here false" + mLastMessage);
                             receive(msg.obj.toString(),false);
                             mMsgEditEt.getText().clear();
                         }
@@ -322,6 +320,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 case net.age.chat.ChatConstant.MESSAGE_CLEAR_EDIT:
 //                    mMsgEditEt.getText().clear();
                     Log.v(TAG,"Someone Left");
+                    break;
+                case net.age.chat.ChatConstant.MESSAGE_DISCONNECT:
+                    Toast.makeText(mContext,R.string.disConnect,Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;

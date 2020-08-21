@@ -15,6 +15,8 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.age.chat.ChatConstant.DEPLOY;
+import static net.age.chat.ChatConstant.MESSAGE_DISCONNECT;
 import static net.age.chat.ChatConstant.SERVER_TEST_ADDR;
 import static net.age.chat.ChatConstant.SERVER_TEST_PORT;
 import static net.age.chat.ChatConstant.SERVER_DEPLOY_ADDR;
@@ -22,13 +24,10 @@ import static net.age.chat.ChatConstant.SERVER_DEPLOY_PORT;
 import static net.age.chat.ChatConstant.SERVER_PROTOCOL;
 
 public class ChatClient{
-    static final boolean deploy = false;
     static final String TAG = "ChatClient";
-//    static final String serverAddr = "ws://fyh520.cn:8887";
     private String serverAddr = SERVER_PROTOCOL + SERVER_TEST_ADDR + ":" + SERVER_TEST_PORT;//192.168.3.151:8887";
     public Draft draft;//
     public WebSocketClient cc;// = new WebSocketClient();
-    public StringBuffer msg = new StringBuffer();
     public Handler chatHandler;
 
     public ChatClient(Handler handler) {
@@ -40,6 +39,9 @@ public class ChatClient{
         if(cc.isOpen()){
             cc.send(msg);
             chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_CLEAR_EDIT);
+        }else {
+            chatHandler.sendEmptyMessage(MESSAGE_DISCONNECT);
+            reconnect();
         }
     }
 
@@ -47,6 +49,9 @@ public class ChatClient{
         if(cc.isOpen()){
             cc.send(msg);
             chatHandler.sendEmptyMessage(ChatConstant.MESSAGE_SEND_MEDIA);
+        }else {
+            chatHandler.sendEmptyMessage(MESSAGE_DISCONNECT);
+            reconnect();
         }
     }
     public void reconnect(){
@@ -64,7 +69,7 @@ public class ChatClient{
     public void chat(){
 
         try {
-            if(deploy){
+            if(DEPLOY){
                 serverAddr = SERVER_PROTOCOL + SERVER_DEPLOY_ADDR + ":" + SERVER_DEPLOY_PORT;
             }
             Map<String,String> header = new HashMap<>();

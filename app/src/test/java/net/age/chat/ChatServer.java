@@ -25,10 +25,12 @@ package net.age.chat;
  */
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import java.net.URLConnection;
 import java.nio.ByteBuffer;
 
 import org.java_websocket.WebSocket;
@@ -42,22 +44,26 @@ import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.TreeMap;
 
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import static net.age.chat.ChatConstant.DEPLOY;
 import static net.age.chat.ChatConstant.SERVER_DEPLOY_ADDR;
 import static net.age.chat.ChatConstant.SERVER_DEPLOY_PORT;
 import static net.age.chat.ChatConstant.SERVER_TEST_ADDR;
 import static net.age.chat.ChatConstant.SERVER_TEST_PORT;
+import static net.age.chat.ChatConstant.fileIndicator;
 
 /**
  * A simple WebSocketServer implementation. Keeps track of a "chatroom".
  */
 public class ChatServer extends WebSocketServer {
     public String mFileName;
-    public static final String fileIndicator = "*#*#";
+
     private Map<String,String> chatMembers = new TreeMap<>();
-    private boolean deploy = false;
 	public ChatServer(){
 		super(new InetSocketAddress(SERVER_TEST_ADDR, SERVER_TEST_PORT));
-		if (!deploy) {
+		if (!DEPLOY) {
 			new InetSocketAddress(SERVER_TEST_ADDR, SERVER_TEST_PORT);
 		} else {
 			new InetSocketAddress(SERVER_DEPLOY_ADDR, SERVER_DEPLOY_PORT);
@@ -86,13 +92,13 @@ public class ChatServer extends WebSocketServer {
 	public void onMessage( WebSocket conn, String message ) {
 		System.out.println("onMessage");
         //if(message.toLowerCase().endsWith(".jpeg") || message.toLowerCase().endsWith(".jpg"))
-        if(message.endsWith(fileIndicator) || message.equals("mm"))
+        if(message.endsWith(fileIndicator))
         {
-        	if(!message.equals("mm")){
+//        	if(!message.equals("mm")){
             	mFileName = message.substring(0,message.length() - fileIndicator.length());
-        	}else {
-				mFileName = message;
-			}
+//        	}else {
+//				mFileName = message;
+//			}
         }else {
 			broadcast( message );
             System.out.println( chatMembers.getOrDefault(conn.toString(),"Some one") + ": " + message );
@@ -102,13 +108,20 @@ public class ChatServer extends WebSocketServer {
 	public void onMessage( WebSocket conn, ByteBuffer message ) {
         final ByteBuffer bb = message;
         final String name = mFileName;
-        mFileName = "file";
+//        mFileName = "file";
         new Thread(new Runnable() {
             @Override
             public void run() {
 				System.out.println("saving to " + "assets/" + name + " -> " + bb.array().length/1024/1024 + "MB");
                 broadcast(name);
                 byte[] array = bb.array();
+				InputStream is = new ByteArrayInputStream(array);
+				try {
+					String mimeType = URLConnection.guessContentTypeFromStream(is);
+					System.out.println("mime:" + mimeType);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
                 byte2image(array,"assets/" + name);
                 broadcast(array);
             }
@@ -173,9 +186,7 @@ public class ChatServer extends WebSocketServer {
 	  }
 
 	public static void main( String[] args ) throws InterruptedException , IOException {
-
 		System.out.println();
-
 		ChatServer s = new ChatServer();
 		s.start();
 		System.out.println( "ChatServer started on port: " + s.getPort() );
@@ -191,7 +202,6 @@ public class ChatServer extends WebSocketServer {
                 byte[] img = image2byte("gg.jpeg");
                 ByteBuffer bb = ByteBuffer.wrap(img);
                 s.broadcast(bb.array());
-                // byte2image(bb.array(),"jj.jpeg");
             }else if(in.endsWith(fileIndicator)){
 
 			}
@@ -211,5 +221,4 @@ public class ChatServer extends WebSocketServer {
 		setConnectionLostTimeout(0);
 		setConnectionLostTimeout(100);
 	}
-
 }

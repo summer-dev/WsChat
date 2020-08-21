@@ -34,6 +34,7 @@ public class ChatUtils {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             byte[] buf = new byte[1024];
             int numBytesRead = 0;
+//            java.lang.OutOfMemoryError: Failed to allocate a 134217744 byte allocation with 25165824 free bytes and 125MB until OOM, max allowed footprint 94712360, growth limit 201326592
             while ((numBytesRead = input.read(buf)) != -1) {
                 output.write(buf, 0, numBytesRead);
             }

@@ -31,7 +31,7 @@ public class ChatConstant {
     public static final int VERSION_SUB = 5;
     public static final String WELCOME = APP_NAME + "_" +VERSION_MAIN + "." + VERSION_SUB + "@" + NICK_NAME;
 
-    public static boolean DEPLOY = false;
+    public static boolean DEPLOY = true;
     public static final String fileIndicator = "*#*#";
     /*界面*/
     public static final String SERVER_PROTOCOL = "ws://";

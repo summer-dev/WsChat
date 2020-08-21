@@ -91,14 +91,9 @@ public class ChatServer extends WebSocketServer {
 	@Override
 	public void onMessage( WebSocket conn, String message ) {
 		System.out.println("onMessage");
-        //if(message.toLowerCase().endsWith(".jpeg") || message.toLowerCase().endsWith(".jpg"))
         if(message.endsWith(fileIndicator))
         {
-//        	if(!message.equals("mm")){
             	mFileName = message.substring(0,message.length() - fileIndicator.length());
-//        	}else {
-//				mFileName = message;
-//			}
         }else {
 			broadcast( message );
             System.out.println( chatMembers.getOrDefault(conn.toString(),"Some one") + ": " + message );

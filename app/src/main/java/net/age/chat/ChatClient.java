@@ -78,6 +78,7 @@ public class ChatClient{
                 @Override
                 public void onOpen(ServerHandshake serverHandshake) {
                     Log.v(TAG,"You are connected to ChatServer: " + getURI() + "\n");
+                    chatHandler.sendEmptyMessageDelayed(ChatConstant.LOGIN_SUCEESS,1500);
                 }
 
                 @Override

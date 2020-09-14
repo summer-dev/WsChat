@@ -1,9 +1,14 @@
 package net.age.chat;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -42,10 +47,14 @@ import net.age.chat.model.FriendInfo;
 import net.age.chat.model.MyClipBoardManager;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import static net.age.chat.ChatConstant.WELCOME;
 import static net.age.chat.ChatConstant.fileIndicator;
@@ -72,6 +81,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     ChatClient chatClient = new ChatClient(handler);
     Object mMessage;
     Context mContext;
+    Queue<Uri> messageQue = new LinkedList<Uri>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +91,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         initData();
         chatClient.chat();
         mContext = this;
+        procIntent();
     }
 
     private void initView(){
@@ -99,6 +110,26 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private void initData(){
         mChatAdapter = new ChatAdapter(this);
         mChatMsgLv.setAdapter(mChatAdapter);
+    }
+    private void procIntent(){
+        Intent intent=getIntent();
+        String action=intent.getAction();
+        if(action.equals(Intent.ACTION_SEND)){
+            Uri uri=intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            //ArrayList<Uri> uris=intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            System.out.println("hhh"+uri.getPath());
+            //chatClient.send(ChatUtils.image2byte(uri.getPath()));
+            messageQue.add(uri);
+//            if(uri!=null ){
+//                try {
+//                    FileInputStream fileInputStream=new FileInputStream(uri.getPath());
+//                    Bitmap bitmap= BitmapFactory.decodeStream(fileInputStream);
+//                    imageView.setImageBitmap(bitmap);
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+        }
     }
     private void receive(String data,boolean sent){
         if(data == null || data.length() == 0){
@@ -123,6 +154,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         chatInfo.setFriendInfo(friendInfo);
 
         if(!sent){
+            notification();
             mLastMessage = data;
             mChatInfoList.add(chatInfo);
             mChatAdapter.setListAll(mChatInfoList);
@@ -130,8 +162,94 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         mMsgEditEt.getText().clear();
 
     }
+    private void notification(){
+        // 1 获取通知管理器
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+    /*Context context, int requestCode,
+    @NonNull Intent intent, @Flags int flags, @Nullable Bundle options*/
+
+        //String id, CharSequence name, @Importance int importance
+
+        // DEFAULT 默认
+        String  channelid = "123";
+        String channelname ="aa";
+
+        // 创建一个通知  频道     public static final int O = 26;
+        // Build.VERSION.SDK_INT 当前 sdk 版本 是不是  大于或者等于  26   8.0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            // 创建频道对象
+            NotificationChannel notificationChannel = new
+                    NotificationChannel(channelid, channelname, NotificationManager.IMPORTANCE_DEFAULT);
+            //  channel 常规设置
+      /*  channel.enableLights(true);//开启指示灯,如果设备有的话。
+        channel.setLightColor(Color.RED);//设置指示灯颜色
+        channel.setShowBadge(true);//检测是否显示角标*/
+            // 创建  频道
+            manager.createNotificationChannel(notificationChannel);
+        }
+
+        // 创建一个延时意图  PendingIntent
+        Intent intent = new Intent(this,this.getClass());
+        PendingIntent activity =
+                PendingIntent.getActivity(this,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // 2 创建通知     设置标题  内容   图标 ...   链式编程
+        Notification notification = new NotificationCompat.Builder(this,channelid)
+                .setContentTitle("SuN")
+                .setContentText("新消息")
+                .setContentIntent(activity)   //  点击通知跳转页面
+                .setAutoCancel(true)   // 点击通知消失
+                .setSmallIcon(R.mipmap.ic_launcher)   // 小图标一定要设置  不设置会报错
+                .build();
+
+        // 3 发送通知
+        manager.notify(1,notification);
+    }
     private void send(){
         ChatInfo chatInfo = new ChatInfo();
+        Editable editable = mMsgEditEt.getText();
+        FriendInfo friendInfo = new FriendInfo();
+        friendInfo.setOnline(true);
+        friendInfo.setFriendNickName("谷雨");
+        friendInfo.setIdentificationName("1989");
+        chatInfo.setFriendInfo(friendInfo);
+        chatInfo.setSend(true);
+        chatInfo.setSendTime(DateTime.getStringByFormat(new Date(), DateTime.DEFYMDHMS));
+
+        BaseMessage message = new BaseMessage();
+        String msg = editable.toString().trim();
+        if(mIsSendFile){
+            mLastMessage = msg;
+            msg += fileIndicator;
+            mIsSendFile = false;
+        }
+        chatClient.send(msg);
+        message.setMsgType(ChatConstant.VISE_COMMAND_TYPE_TEXT);
+        message.setMsgContent(msg);
+
+        if(mFilePath != null){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.v(TAG,"sendFile" + mFilePath);
+                    chatClient.send(ChatUtils.image2byte(mFilePath));
+                }
+            }).start();
+        }
+        message.setMsgLength(msg.length());
+        chatInfo.setMessage(message);
+
+        mChatInfoList.add(chatInfo);
+        mChatAdapter.setListAll(mChatInfoList);
+    }
+    private void send(Uri uri){
+        ChatInfo chatInfo = new ChatInfo();
+        mFilePath = ChatUtils.getPath(this,uri);
+        mIsSendFile = true;
+        mMsgEditEt.setText(new File(mFilePath).getName());
+
         Editable editable = mMsgEditEt.getText();
         FriendInfo friendInfo = new FriendInfo();
         friendInfo.setOnline(true);
@@ -271,6 +389,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
+                case net.age.chat.ChatConstant.LOGIN_SUCEESS:
+                    for(Uri uri : messageQue){
+                        System.out.println("abode");
+                        send(uri);
+                        messageQue.poll();
+                    }
                 case net.age.chat.ChatConstant.MESSAGE_ONLINE:
                     Log.v(TAG,"New Member");
                     break;
@@ -329,13 +453,22 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 //        unregisterReceiver(networkReceiver);
         super.onDestroy();
     }
+
+    @Override
+    protected void onStop(){
+        Log.d(TAG, "onStop: ");
+//        unregisterReceiver(networkReceiver);
+        super.onStop();
+    }
+
     @Override
     protected  void onResume() {
         super.onResume();
     }
     private void saveFile(Object msg){
         ByteBuffer bb = (ByteBuffer)msg;
-        ChatUtils.byte2image(bb.array(),"/sdcard/" + mLastMessage);
+        ChatUtils.byte2image(bb.array(),Environment.getExternalStorageDirectory().getPath() + "/1chat/" + mLastMessage);
+        Log.d(TAG, Environment.getExternalStorageDirectory().getPath() + "/1chat/" + mLastMessage);
     }
     BroadcastReceiver networkReceiver = new BroadcastReceiver() {
         @Override

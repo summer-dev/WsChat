@@ -13,6 +13,17 @@ import java.io.OutputStream;
 
 
 public class ChatUtils {
+
+    public static boolean DEPLOY = false;
+    public static final String fileIndicator = "*#*#";
+    /*界面*/
+    public static final String SERVER_PROTOCOL = "ws://";
+    public static final String SERVER_TEST_ADDR = "192.168.3.156";
+    public static final int SERVER_TEST_PORT = 8888;
+
+    public static final String SERVER_DEPLOY_ADDR = "fyh520.cn";
+    public static final int SERVER_DEPLOY_PORT = 8888;
+
     public static byte[] image2byte(String path){
         byte[] data = null;
         FileInputStream input = null;

@@ -58,4 +58,28 @@ jar -cfm cht.jar man_l.mf ChatClient*.class
 
 ####
 javac -Xbootclasspath/a:jwd.jar -Xlint:unchecked ChatClient.java
-jar -cfm cc.jar man_lib.mf ChatClient*.classjava -Xbootclasspath/a:lib/jwd.jar ChatClient
+jar -cfm cc.jar man_lib.mf Chat*.class
+java -Xbootclasspath/a:lib/jwd.jar ChatClient
+
+
+1.确保sqlite-jdbc-3.7.2.jar位于classpath
+2.javac ActiServer.java && java ActiServer
+3.
+firefox http://localhost:6789/l8:316D2ECE1FA64390 
+firefox http://localhost:6789/l8:316D2ECE1FA64399
+firefox http://localhost:8080/examples/servlets/servlet/HelloTomcat?imei=227974908f49048&name=HelloWorlfd&time=124535f
+4.改善方向，多台设备并行访问，做成jar，后台运行
+
+wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.9/slf4j-api-1.7.9.jar
+847944 javac -Xlint:unchecked -cp .:jw.jar ChatClient.java 
+ 1087  1586847958 javac -cp .:jw.jar ChatClient.java 
+ 1088  1586847964 lt
+ 1089  1586847969 javac -cp .:jw.jar ChatClient.java 
+ 1090  1586847972 lt
+ 1091  1586847981 javac -Xlint:unchecked -cp .:jw.jar ChatClient.java 
+ 1092  1586848009 java -cp .:jw.jar:slf4j.jar:slf4jsimple.jar ChatClient
+ 1093  1586848027 java -cp .:jw.jar:slf4j.jar:slf4jsimple.jar ChatServer
+
+java -cp .:jwd.jar ChatClient 192.168.3.151
+ ps -ef | grep kill
+ kill -0 ps No.

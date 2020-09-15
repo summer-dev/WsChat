@@ -112,6 +112,7 @@ public class ChatClient{
                     Log.v(TAG,e.getMessage());
                 }
             };
+            cc.setConnectionLostTimeout(0);
             cc.connect();
         }catch (URISyntaxException e){
             Log.v(TAG,e.getMessage());

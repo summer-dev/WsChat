@@ -19,10 +19,6 @@ public class ChatConstant {
     public static final int MESSAGE_DISCONNECT = 7; //连接断开
     public static final int LOGIN_SUCEESS = 8;
 
-
-
-
-
     /*User Login State*/
     public static final int USER_NEW = 1; //新成员注册
     public static final int USER_LOGINED = 1; //用户已经登录
@@ -33,12 +29,12 @@ public class ChatConstant {
     public static final int VERSION_SUB = 7;
     public static final String WELCOME = APP_NAME + "_" +VERSION_MAIN + "." + VERSION_SUB + "@" + NICK_NAME;
 
-    public static boolean DEPLOY = true;
+    public static boolean DEPLOY = false;
     public static final String fileIndicator = "*#*#";
     /*界面*/
     public static final String SERVER_PROTOCOL = "ws://";
-    public static final String SERVER_TEST_ADDR = "192.168.3.174";
-    public static final int SERVER_TEST_PORT = 8887;
+    public static final String SERVER_TEST_ADDR = "192.168.3.156";
+    public static final int SERVER_TEST_PORT = 8888;
 
     public static final String SERVER_DEPLOY_ADDR = "fyh520.cn";
     public static final int SERVER_DEPLOY_PORT = 8888;

@@ -28,17 +28,23 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.awt.Dimension;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.UUID;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
+import java.io.File;
+import javax.swing.JLabel;
+import javax.swing.JFileChooser;
 
 import org.java_websocket.WebSocketImpl;
 import org.java_websocket.client.WebSocketClient;
@@ -48,23 +54,28 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class ChatClient extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -6056260699202978657L;
+	//public static final String fileIndicator = "*#*#";
 	public static boolean deploy = true;
 	private final JTextField uriField;
 	private final JButton connect;
 	private final JButton close;
+	private final JButton attatch;
 	private final JTextArea ta;
 	private final JTextField chatField;
 	private final JComboBox draft;
 	private WebSocketClient cc;
 	private String mRecevFileName = "file";
-	private static final String mSavePath = "../app/assets/client_";
+	 private boolean mIsSendFile = false;
+	private static final String mSavePath = "assets/client_";
+	// private static final String mSavePath = "D:\\Documents\\Downloads\\";
 
 	public ChatClient( String defaultlocation ) {
 		super( "WebSocket Chat Client" );
+		// setSize(1024,768);
 		Container c = getContentPane();
 		GridLayout layout = new GridLayout();
 		layout.setColumns( 1 );
-		layout.setRows( 6 );
+		layout.setRows( 7 );
 		c.setLayout( layout );
 
 		Draft[] drafts = { new Draft_6455() };
@@ -85,6 +96,9 @@ public class ChatClient extends JFrame implements ActionListener {
 		c.add( close );
 
 		JScrollPane scroll = new JScrollPane();
+		// Dimension dim = new Dimension(320,220);
+		//scroll.setSize(dim);
+		//scroll.setSize(1027,768);
 		ta = new JTextArea();
 		scroll.setViewportView( ta );
 		c.add( scroll );
@@ -93,6 +107,13 @@ public class ChatClient extends JFrame implements ActionListener {
 		chatField.setText( "" );
 		chatField.addActionListener( this );
 		c.add( chatField );
+		
+		attatch = new JButton("Attatch");
+		attatch.addActionListener( this );
+		attatch.setEnabled( false );
+		c.add( attatch);
+		
+		
 
 		java.awt.Dimension d = new java.awt.Dimension( 300, 400 );
 		setPreferredSize( d );
@@ -141,13 +162,18 @@ public class ChatClient extends JFrame implements ActionListener {
 					public void onMessage( ByteBuffer s) {
 						System.out.println("onMessage(ByteBuffer) @ : " + System.currentTimeMillis()); 
 						System.out.println("media received " + mSavePath + mRecevFileName);
+						
+						if(mRecevFileName.equals("file")){
+							mRecevFileName += "_" + UUID.randomUUID().toString();
+						}
 						ChatUtils.byte2image(s.array(),mSavePath + mRecevFileName);
-                }
-
+            
+					}
 					@Override
 					public void onOpen( ServerHandshake handshake ) {
 						ta.append( "You are connected to ChatServer: " + getURI() + "\n" );
 						ta.setCaretPosition( ta.getDocument().getLength() );
+						attatch.setEnabled(true);
 					}
 
 					@Override
@@ -158,6 +184,7 @@ public class ChatClient extends JFrame implements ActionListener {
 						uriField.setEditable( true );
 						draft.setEditable( true );
 						close.setEnabled( false );
+						attatch.setEnabled(false);
 					}
 
 					@Override
@@ -176,12 +203,33 @@ public class ChatClient extends JFrame implements ActionListener {
 				connect.setEnabled( false );
 				uriField.setEditable( false );
 				draft.setEditable( false );
+				cc.setConnectionLostTimeout( 0 );
 				cc.connect();
 			} catch ( URISyntaxException ex ) {
 				ta.append( uriField.getText() + " is not a valid WebSocket URI\n" );
 			}
 		} else if( e.getSource() == close ) {
 			cc.close();
+		}else if( e.getSource() == attatch ) {
+			// TODO Auto-generated method stub
+			JFileChooser jfc=new JFileChooser();
+			jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
+			jfc.showDialog(new JLabel(), "File Chooser");
+			File file=jfc.getSelectedFile();
+			if(file.isDirectory()){
+				System.out.println("Path:"+file.getAbsolutePath());
+				return;
+			}else if(file.isFile()){
+				System.out.println("File:"+file.getAbsolutePath());
+				cc.send(jfc.getSelectedFile().getName().trim()+ChatUtils.fileIndicator);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+					  
+						cc.send(ChatUtils.image2byte(file.getAbsolutePath()));
+					}
+				}).start();
+			}
 		}
 	}
 
@@ -193,8 +241,8 @@ public class ChatClient extends JFrame implements ActionListener {
 		} else {
 			//location = "ws://localhost:8887";
 			if(deploy){
-				location = "ws://fyh520.cn:8888";
-//				location = "ws://132.232.7.184:8888";
+				//location = "ws://fyh520.cn:8888";
+				location = "ws://192.168.3.156:8888";
 			}else {
 				location = "ws://192.168.3.160:8887";
 			}

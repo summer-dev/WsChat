@@ -1,0 +1,3 @@
+#!/bin/bash
+javac ChatServer.java
+nohup java ChatServer

@@ -1,0 +1,1 @@
+java -Xbootclasspath/a:lib/jwd.jar -cp build ChatClient

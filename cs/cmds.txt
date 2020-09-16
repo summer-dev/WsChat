@@ -1,0 +1,85 @@
+﻿https://blog.csdn.net/w47_csdn/article/details/80254459
+10.����ɿ����е�jar
+[root@localhost classes]# jar -cvfe jack2.jar org.jack.demo.b.b *
+���ϵͳ��������
+classpath=.;%JAVA_HOME%/lib/dt.jar;%JAVA_HOME%/lib/tools.jar;E:\Program Files\R-3.4.0\library\rJava\jri;E:\Program Files\Notepad++\;E:\OneDrive\work\guyue\jwd.jar
+1.root chat
+javac -Xlint:unchecked ChatClient.java 
+java ChatClient ws://fyh520.cn:8887 
+
+2.hello chat
+cd hello 
+javac -Xlint:unchecked ChatClient.java
+cd ..
+java hello.ChatClient ws://fyh520.cn:8887
+
+3.
+javac --Xlint:unchecked ChatClient.java
+vi man.mf
+type in:
+Manifest-Version: 1.0
+Created-By: 1.8.0_131 (Oracle Corporation)
+Main-Class: ChatClient
+
+jar -cfm cc.jar man.mf ChatClient*.class
+java -Xbootclasspath/a:jwd.jar -jar cc.jar 
+java -Xbootclasspath/a:jwd.jar;other.jar -jar cc.jar 
+
+4.
+javac -Xlint:unchecked ChatClient.java
+vi man_lib.mf
+type in:
+Manifest-Version: 1.0
+Created-By: 1.8.0_131 (Oracle Corporation)
+Main-Class: ChatClient
+Class-Path: lib/jwd.jar
+
+jar -cfm chat.jar man_lib.mf ChatClient*.class
+click chat.jar and run
+
+4.
+javac -Xlint:unchecked ChatClient.java
+vi man_lib.mf
+type in:
+Manifest-Version: 1.0
+Created-By: 1.8.0_131 (Oracle Corporation)
+Main-Class: ChatClient
+Class-Path: lib/jwd.jar
+
+jar -cfm chat.jar man_lib.mf ChatClient*.class
+click chat.jar and run
+
+5.
+javac -Xlint:unchecked ChatClient.java
+touch man_l.mf
+nl man_l.mf | sed '1a Manifest-Version: 1.0\nCreated-By: 1.8.0_131 (Oracle Corporation)\nMain-Class: ChatClient\nClass-Path: lib/jwd.jar' > mm.mf
+jar -cfm cht.jar man_l.mf ChatClient*.class
+
+
+####
+javac -Xbootclasspath/a:jwd.jar -Xlint:unchecked ChatClient.java
+jar -cfm cc.jar man_lib.mf Chat*.class
+java -Xbootclasspath/a:lib/jwd.jar ChatClient
+
+
+1.确保sqlite-jdbc-3.7.2.jar位于classpath
+2.javac ActiServer.java && java ActiServer
+3.
+firefox http://localhost:6789/l8:316D2ECE1FA64390 
+firefox http://localhost:6789/l8:316D2ECE1FA64399
+firefox http://localhost:8080/examples/servlets/servlet/HelloTomcat?imei=227974908f49048&name=HelloWorlfd&time=124535f
+4.改善方向，多台设备并行访问，做成jar，后台运行
+
+wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.9/slf4j-api-1.7.9.jar
+847944 javac -Xlint:unchecked -cp .:jw.jar ChatClient.java 
+ 1087  1586847958 javac -cp .:jw.jar ChatClient.java 
+ 1088  1586847964 lt
+ 1089  1586847969 javac -cp .:jw.jar ChatClient.java 
+ 1090  1586847972 lt
+ 1091  1586847981 javac -Xlint:unchecked -cp .:jw.jar ChatClient.java 
+ 1092  1586848009 java -cp .:jw.jar:slf4j.jar:slf4jsimple.jar ChatClient
+ 1093  1586848027 java -cp .:jw.jar:slf4j.jar:slf4jsimple.jar ChatServer
+
+java -cp .:jwd.jar ChatClient 192.168.3.151
+ ps -ef | grep kill
+ kill -0 ps No.

@@ -54,8 +54,7 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class ChatClient extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -6056260699202978657L;
-	//public static final String fileIndicator = "*#*#";
-	public static boolean deploy = true;
+	public static boolean deploy = ChatUtils.DEPLOY;
 	private final JTextField uriField;
 	private final JButton connect;
 	private final JButton close;
@@ -67,6 +66,8 @@ public class ChatClient extends JFrame implements ActionListener {
 	private String mRecevFileName = "file";
 	 private boolean mIsSendFile = false;
 	private static final String mSavePath = "assets/client_";
+	static String serverAddr = ChatUtils.SERVER_ADDR;
+	static int serverPort = ChatUtils.SERVER_DEPLOY_PORT;
 	// private static final String mSavePath = "D:\\Documents\\Downloads\\";
 
 	public ChatClient( String defaultlocation ) {
@@ -96,9 +97,6 @@ public class ChatClient extends JFrame implements ActionListener {
 		c.add( close );
 
 		JScrollPane scroll = new JScrollPane();
-		// Dimension dim = new Dimension(320,220);
-		//scroll.setSize(dim);
-		//scroll.setSize(1027,768);
 		ta = new JTextArea();
 		scroll.setViewportView( ta );
 		c.add( scroll );
@@ -234,21 +232,12 @@ public class ChatClient extends JFrame implements ActionListener {
 	}
 
 	public static void main( String[] args ) {
-		String location;
-		if( args.length != 0 ) {
-			location = args[ 0 ];
-			System.out.println( "Default server url specified: \'" + location + "\'" );
-		} else {
-			//location = "ws://localhost:8887";
-			if(deploy){
-				//location = "ws://fyh520.cn:8888";
-				location = "ws://192.168.3.156:8888";
-			}else {
-				location = "ws://192.168.3.160:8887";
-			}
-			System.out.println( "Default server url not specified: defaulting to \'" + location + "\'" );
+		if(deploy == false) {
+			serverAddr = ChatUtils.SERVER_TEST_ADDR;
+			serverPort = ChatUtils.SERVER_TEST_PORT;
 		}
-		new ChatClient( location );
+		System.out.println( "Default server url not specified: defaulting to \'" + ChatUtils.SERVER_PROTOCOL + serverAddr + ":" + serverPort + "\'" );
+		new ChatClient( ChatUtils.SERVER_PROTOCOL + serverAddr + ":" + serverPort);
 	}
 
 }

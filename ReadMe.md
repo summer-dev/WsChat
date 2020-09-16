@@ -9,10 +9,13 @@ A mini server which implemented websocket protocol is listening request within j
 
 2.Then put https://github.com/TooTallNate/Java-WebSocket/releases/download/v1.4.1/Java-WebSocket-1.4.1-with-dependencies.jar,rename as jwd1.4.1.jar and move it into your class_path.
 
-3.`cd cs/` Modify your test/deploy ip address and corresponding port numpber in `ChatUtils.java`
+3.Modify your test/deploy ip address and corresponding port numpber in `cs/src/ChatUtils.java`
 
-4.
+4.make
 
 #### Setting up ChatClient (PC)
-1.Configure server address and port number in ChatClient.java.
-2.Put jwd.jar within CLASS_PATH, cd client && javac -Xlint:unccdhecked ChatClient.java && java ChatClient
+1.Configure server address and port number in `cs/src/ChatClient.java`.
+
+2.Put jwd.jar within CLASS_PATH,
+
+3.double click client.bat

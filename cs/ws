@@ -1,0 +1,3 @@
+#!/bin/bash
+#javac ChatServer.java
+nohup java -Xbootclasspath/a:lib/jwd.jar -cp build ChatServer

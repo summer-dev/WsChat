@@ -1,0 +1,37 @@
+Error: Could not find or load main class ChatServer
+
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+ChatServer started on port: 8888
+Exception in thread "main" java.io.IOException: Bad file descriptor
+	at java.io.FileInputStream.readBytes(Native Method)
+	at java.io.FileInputStream.read(FileInputStream.java:255)
+	at java.io.BufferedInputStream.read1(BufferedInputStream.java:284)
+	at java.io.BufferedInputStream.read(BufferedInputStream.java:345)
+	at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:284)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:326)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:178)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:161)
+	at java.io.BufferedReader.readLine(BufferedReader.java:324)
+	at java.io.BufferedReader.readLine(BufferedReader.java:389)
+	at ChatServer.main(ChatServer.java:175)
+Server started!
+bbb100 entered the room!
+onMessage
+bbb100: gg
+DESKTOP-Q2TS4FG entered the room!
+bbb100 has left the room!
+bbb100 entered the room!
+bbb100 has left the room!
+bbb100 entered the room!
+bbb100 has left the room!
+bbb100 entered the room!
+onMessage
+DESKTOP-Q2TS4FG has left the room!
+DESKTOP-Q2TS4FG entered the room!
+onMessage
+DESKTOP-Q2TS4FG: hh
+DESKTOP-Q2TS4FG has left the room!
+bbb100 has left the room!

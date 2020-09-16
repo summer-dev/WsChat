@@ -11,11 +11,14 @@ A mini server which implemented websocket protocol is listening request within j
 
 3.Modify your test/deploy ip address and corresponding port numpber in `cs/src/ChatUtils.java`
 
-4.make
+4.Open terminal and navigate to path `cs` ,type `make`
 
 #### Setting up ChatClient (PC)
+
 1.Configure server address and port number in `cs/src/ChatClient.java`.
 
 2.Put jwd.jar within CLASS_PATH,
 
-3.double click client.bat
+3.Open terminal and navigate to path `cs` ,type `make c`
+
+4.Double click `client.bat`

@@ -81,5 +81,6 @@ wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.9/slf4j-api-1.7.9.ja
  1093  1586848027 java -cp .:jw.jar:slf4j.jar:slf4jsimple.jar ChatServer
 
 java -cp .:jwd.jar ChatClient 192.168.3.151
- ps -ef | grep kill
+ ps -ef | grep java
  kill -0 ps No.
+ kill -9 ps No.

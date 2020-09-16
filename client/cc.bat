@@ -1,1 +1,0 @@
-java -Xbootclasspath/a:jwd.jar -jar cc.jar 

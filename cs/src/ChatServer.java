@@ -161,7 +161,7 @@ public class ChatServer extends WebSocketServer {
 	public static void main( String[] args ) throws InterruptedException , IOException {
 
 		System.out.println();
-		if(!ChatUtils.DEPLOY){
+		if(ChatUtils.DEPLOY == false){
 			serverAddr = ChatUtils.SERVER_TEST_ADDR;
 			serverPort = ChatUtils.SERVER_TEST_PORT;
 		}

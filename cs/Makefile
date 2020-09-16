@@ -20,11 +20,11 @@ c: $(SRC)ChatClient.java $(SRC)ChatUtils.java
 client:  $(RES)client.mf
 #	java -Xbootclasspath/a:lib/jwd.jar -cp build ChatClient
 #	jar $(JARX) $(BUILD)client.jar $^ $(BUILD)Chat*.class
-	mv $(SRC)*.class $(BUILD)
-	jar -cfm client.jar res/client.mf $(BUILD)Chat*.class
+	jar -cfm $(BUILD)client.jar $(RES)/client.mf $(BUILD)Chat*.class
 	
 server:  $(RES)server.mf
 	jar $(JARX) server.jar $^ $(BUILD)Chat*.class
 	
 deploy:
-	$(JAVA) $(JAVAX) -cp $(BUILD) ChatServer
+	mv $(SRC)*.class $(BUILD)
+	$(JAVA) $(JAVAX) -cp $(BUILD):./build ChatServer

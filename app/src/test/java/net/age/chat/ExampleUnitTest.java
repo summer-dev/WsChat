@@ -1,7 +1,10 @@
 package net.age.chat;
 
+import net.age.chat.model.ChatUtils;
+
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;

@@ -10,6 +10,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 
@@ -198,6 +200,19 @@ public class ChatUtils {
                 e.printStackTrace();
             }
         }
+    }
+    @NonNull
+    public static String getMimeType(@NonNull String fileName) {
+        String type = null;
+        final String url = fileName;
+        final String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
+        }
+        if (type == null) {
+            type = "image/*"; // fallback type. You might set it to */*
+        }
+        return type;
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static String getPath(final Context context, final Uri uri) {

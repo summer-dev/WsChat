@@ -24,12 +24,12 @@ public class ChatConstant {
     public static final int USER_LOGINED = 1; //用户已经登录
 
     public static final String APP_NAME  = "SuN";
-    public static final String NICK_NAME  = "Electra";
+    public static final String NICK_NAME  = "DoubleSnake";
     public static final int VERSION_MAIN = 1;
-    public static final int VERSION_SUB = 7;
+    public static final int VERSION_SUB = 9;
     public static final String WELCOME = APP_NAME + "_" +VERSION_MAIN + "." + VERSION_SUB + "@" + NICK_NAME;
 
-    public static boolean DEPLOY = false;
+    public static boolean DEPLOY = true;
     public static final String fileIndicator = "*#*#";
     /*界面*/
     public static final String SERVER_PROTOCOL = "ws://";

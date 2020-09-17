@@ -1,5 +1,6 @@
 package net.age.chat;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
@@ -10,12 +11,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -24,6 +24,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.util.Log;
@@ -45,13 +48,12 @@ import net.age.chat.model.ChatInfo;
 import net.age.chat.model.ChatUtils;
 import net.age.chat.model.FriendInfo;
 import net.age.chat.model.MyClipBoardManager;
+import net.age.chat.model.NotificationUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -64,6 +66,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private static final int GET_CONTENT_INTENT = 1000;
     private static final int REQUEST_FOR_READ_EXTERNAL_PERMISSION = 1001;
     private static final int REQUEST_FOR_WRITE_EXTERNAL_PERMISSION = 1002;
+    private static final int SELECT_FILE = 1003;
     static final String TAG = "ChatActivity";
     private ListView mChatMsgLv;
     private ChatAdapter mChatAdapter;
@@ -77,6 +80,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private boolean mIsRecevFile = false;
     private String mFilePath;
     private String mLastMessage;
+    private String attatchPath="1chat";
+    private String uriFileHeader = "file://";
     ChatHandler handler = new ChatHandler();
     ChatClient chatClient = new ChatClient(handler);
     Object mMessage;
@@ -108,6 +113,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData(){
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.detectFileUriExposure();
+        }
         mChatAdapter = new ChatAdapter(this);
         mChatMsgLv.setAdapter(mChatAdapter);
     }
@@ -154,7 +164,15 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         chatInfo.setFriendInfo(friendInfo);
 
         if(!sent){
-            notification();
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                //deprecated in API 26
+                v.vibrate(500);
+            }
+//            notificationAttatch();
             mLastMessage = data;
             mChatInfoList.add(chatInfo);
             mChatAdapter.setListAll(mChatInfoList);
@@ -162,7 +180,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         mMsgEditEt.getText().clear();
 
     }
-    private void notification(){
+    @NonNull
+    private void notificationAttatch(@NonNull String fileName){
         // 1 获取通知管理器
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -173,7 +192,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
         // DEFAULT 默认
         String  channelid = "123";
-        String channelname ="aa";
+        String channelname ="SuN";
 
         // 创建一个通知  频道     public static final int O = 26;
         // Build.VERSION.SDK_INT 当前 sdk 版本 是不是  大于或者等于  26   8.0
@@ -183,26 +202,39 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             NotificationChannel notificationChannel = new
                     NotificationChannel(channelid, channelname, NotificationManager.IMPORTANCE_DEFAULT);
             //  channel 常规设置
-      /*  channel.enableLights(true);//开启指示灯,如果设备有的话。
-        channel.setLightColor(Color.RED);//设置指示灯颜色
-        channel.setShowBadge(true);//检测是否显示角标*/
+            notificationChannel.enableLights(true);//开启指示灯,如果设备有的话。
+            notificationChannel.setLightColor(Color.RED);//设置指示灯颜色
+            notificationChannel.setShowBadge(true);//检测是否显示角标*/
             // 创建  频道
             manager.createNotificationChannel(notificationChannel);
         }
 
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        Uri uri = Uri.parse(uriFileHeader + new File(Environment.getExternalStorageDirectory() +  File.separator + attatchPath + File.separator+fileName).getAbsolutePath());
+        intent.setDataAndType(uri,ChatUtils.getMimeType(fileName));
+//        startActivity(intent);
+
         // 创建一个延时意图  PendingIntent
-        Intent intent = new Intent(this,this.getClass());
+//        Intent intent = new Intent(this,this.getClass());
         PendingIntent activity =
                 PendingIntent.getActivity(this,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-
+        long[] v = {500,1000};
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+//        notificationBuilder.setVibrate(v);
         // 2 创建通知     设置标题  内容   图标 ...   链式编程
         Notification notification = new NotificationCompat.Builder(this,channelid)
-                .setContentTitle("SuN")
-                .setContentText("新消息")
+                .setContentTitle("新附件:"+ChatUtils.getMimeType(fileName))
+                .setContentText(fileName)
                 .setContentIntent(activity)   //  点击通知跳转页面
                 .setAutoCancel(true)   // 点击通知消失
                 .setSmallIcon(R.mipmap.ic_launcher)   // 小图标一定要设置  不设置会报错
+                .setVibrate(v)
+                .setSound(soundUri)
+//                .setLights(Color.GREEN,1000,1000)
                 .build();
+
+//        notification.flags = Notification.FLAG_SHOW_LIGHTS;// 指定通知的一些行为，其中就包括显示
 
         // 3 发送通知
         manager.notify(1,notification);
@@ -342,6 +374,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 mIsSendFile = true;
                 mMsgEditEt.setText(new File(mFilePath).getName());
             }
+        }else if(requestCode == SELECT_FILE){
+            if (resultData != null) {
+                System.out.println("hhh" + resultData.getData());
+            }
         }
     }
     @Override
@@ -467,8 +503,16 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
     private void saveFile(Object msg){
         ByteBuffer bb = (ByteBuffer)msg;
-        ChatUtils.byte2image(bb.array(),Environment.getExternalStorageDirectory().getPath() + "/1chat/" + mLastMessage);
-        Log.d(TAG, Environment.getExternalStorageDirectory().getPath() + "/1chat/" + mLastMessage);
+        ChatUtils.byte2image(bb.array(),Environment.getExternalStorageDirectory().getPath() + File.separator+attatchPath + File.separator + mLastMessage);
+        if(mLastMessage != null){
+//            if(NotificationUtil.isNotifyEnabled(mContext)){
+//                Log.v(TAG,"hhh"+"lol");
+//            }else {
+//                Toast.makeText(mContext,"hhh"+"lol",Toast.LENGTH_SHORT).show();
+//            }
+            notificationAttatch(mLastMessage);
+        }
+        Log.d(TAG, Environment.getExternalStorageDirectory().getPath() + File.separator+attatchPath + File.separator + mLastMessage);
     }
     BroadcastReceiver networkReceiver = new BroadcastReceiver() {
         @Override

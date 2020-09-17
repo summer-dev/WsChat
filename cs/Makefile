@@ -27,4 +27,4 @@ server:  $(RES)server.mf
 	
 deploy:
 	mv $(SRC)*.class $(BUILD)
-	$(JAVA) $(JAVAX) -cp $(BUILD):./build ChatServer
+	$(JAVA) $(JAVAX) -cp $(BUILD):./build ChatClient

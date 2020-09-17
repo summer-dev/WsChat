@@ -1,5 +1,4 @@
 
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,7 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ChatUtils {
 
@@ -23,6 +23,8 @@ public class ChatUtils {
     public static final String SERVER_DEPLOY_ADDR = "172.27.0.6";
     public static final String SERVER_ADDR = "fyh520.cn";
     public static final int SERVER_DEPLOY_PORT = 8888;
+
+    public static final String DEFYMDHMS = "yyyy-MM-dd HH:mm:ss";
 
     public static byte[] image2byte(String path){
         byte[] data = null;
@@ -107,5 +109,15 @@ public class ChatUtils {
             System.out.println("Exception: " + ex);
             ex.printStackTrace();
         }
+    }
+    public static String getStringByFormat(Date date, String format) {
+        SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat(format);
+        String strDate = null;
+        try {
+            strDate = mSimpleDateFormat.format(date);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return strDate;
     }
 }

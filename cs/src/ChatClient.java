@@ -32,6 +32,7 @@ import java.awt.Dimension;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
@@ -46,6 +47,7 @@ import java.io.File;
 import javax.swing.JLabel;
 import javax.swing.JFileChooser;
 
+
 import org.java_websocket.WebSocketImpl;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
@@ -56,8 +58,8 @@ public class ChatClient extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -6056260699202978657L;
 	public static boolean deploy = ChatUtils.DEPLOY;
 	private final JTextField uriField;
-	private final JButton connect;
-	private final JButton close;
+//	private final JButton connect;
+//	private final JButton close;
 	private final JButton attatch;
 	private final JTextArea ta;
 	private final JTextField chatField;
@@ -76,7 +78,7 @@ public class ChatClient extends JFrame implements ActionListener {
 		Container c = getContentPane();
 		GridLayout layout = new GridLayout();
 		layout.setColumns( 1 );
-		layout.setRows( 7 );
+		layout.setRows( 5 );
 		c.setLayout( layout );
 
 		Draft[] drafts = { new Draft_6455() };
@@ -87,14 +89,14 @@ public class ChatClient extends JFrame implements ActionListener {
 		uriField.setText( defaultlocation );
 		c.add( uriField );
 
-		connect = new JButton( "Connect" );
-		connect.addActionListener( this );
-		c.add( connect );
+//		connect = new JButton( "Connect" );
+//		connect.addActionListener( this );
+//		c.add( connect );
 
-		close = new JButton( "Close" );
-		close.addActionListener( this );
-		close.setEnabled( false );
-		c.add( close );
+//		close = new JButton( "Close" );
+//		close.addActionListener( this );
+//		close.setEnabled( false );
+//		c.add( close );
 
 		JScrollPane scroll = new JScrollPane();
 		ta = new JTextArea();
@@ -129,86 +131,107 @@ public class ChatClient extends JFrame implements ActionListener {
 
 		setLocationRelativeTo( null );
 		setVisible( true );
+		chat();
 	}
+	public void chat(){
+		try {
+			// cc = new ChatClient(new URI(uriField.getText()), area, ( Draft ) draft.getSelectedItem() );
+			Map<String,String> header = new HashMap<>();
+			header.put("client",System.getenv("COMPUTERNAME"));
+			cc = new WebSocketClient( new URI( uriField.getText() ), (Draft) draft.getSelectedItem(),header) {
 
-	public void actionPerformed( ActionEvent e ) {
+				@Override
+				public void onMessage( String message ) {
+					ta.append( ChatUtils.getStringByFormat(new Date(),ChatUtils.DEFYMDHMS) + " @ guyue(+_+): " +   message + "\n" );
+					System.out.println("onMessage(String) @ : " + System.currentTimeMillis());
+					ta.setCaretPosition( ta.getDocument().getLength() );
+					if(message.contains(".")){
+						mRecevFileName = message;
+					}
+				}
+				@Override
+				public void onMessage( ByteBuffer s) {
+					System.out.println("onMessage(ByteBuffer) @ : " + System.currentTimeMillis());
+					System.out.println("media received " + mSavePath + mRecevFileName);
+//					ta.append( ChatUtils.getStringByFormat(new Date(),ChatUtils.DEFYMDHMS) + " @ guyue(+_+): " +   mRecevFileName + "\n" );
+					if(mRecevFileName.equals("file")){
+						mRecevFileName += "_" + UUID.randomUUID().toString();
+					}
+					ChatUtils.byte2image(s.array(),mSavePath + mRecevFileName);
 
+				}
+				@Override
+				public void onOpen( ServerHandshake handshake ) {
+					ta.append( "You are connected to ChatServer: " + getURI() + "\n" );
+					ta.setCaretPosition( ta.getDocument().getLength() );
+					attatch.setEnabled(true);
+				}
+
+				@Override
+				public void onClose( int code, String reason, boolean remote ) {
+					ta.append( "You have been disconnected from: " + getURI() + "; Code: " + code + " " + reason + "\n" );
+					ta.setCaretPosition( ta.getDocument().getLength() );
+//					connect.setEnabled( true );
+					uriField.setEditable( true );
+					draft.setEditable( true );
+//					close.setEnabled( false );
+					attatch.setEnabled(false);
+				}
+
+				@Override
+				public void onError( Exception ex ) {
+					ta.append( "Exception occured ...\n" + ex + "\n" );
+					ta.setCaretPosition( ta.getDocument().getLength() );
+					ex.printStackTrace();
+//					connect.setEnabled( true );
+					uriField.setEditable( true );
+					draft.setEditable( true );
+//					close.setEnabled( false );
+				}
+			};
+
+//			close.setEnabled( true );
+//			connect.setEnabled( false );
+			uriField.setEditable( false );
+			draft.setEditable( false );
+			cc.setConnectionLostTimeout( 0 );
+			cc.connect();
+		} catch ( URISyntaxException ex ) {
+			ta.append( uriField.getText() + " is not a valid WebSocket URI\n" );
+		}
+	}
+	public void actionPerformed( ActionEvent e ){
 		if( e.getSource() == chatField ) {
-			if( cc != null ) {
-				cc.send( chatField.getText() );
+			if(cc != null){
+				if(cc.isOpen()){
+					cc.send(chatField.getText());
+				}else {
+					cc.reconnect();
+					cc.send(chatField.getText());
+				}
 				chatField.setText( "" );
 				chatField.requestFocus();
+			}else {
+				chat();
 			}
 
-		} else if( e.getSource() == connect ) {
-			try {
-				// cc = new ChatClient(new URI(uriField.getText()), area, ( Draft ) draft.getSelectedItem() );
-				Map<String,String> header = new HashMap<>();
-				header.put("client",System.getenv("COMPUTERNAME"));
-				cc = new WebSocketClient( new URI( uriField.getText() ), (Draft) draft.getSelectedItem(),header) {
+//			if( cc != null ) {
+//				System.out.print("cc non null");
+//				if (!cc.isOpen() ){
+//					cc.reconnect();
+//				}
+//				cc.send( chatField.getText() );
+//				chatField.setText( "" );
+//				chatField.requestFocus();
+//			}else{
+//				System.out.print("cc null");
+//			}
 
-					@Override
-					public void onMessage( String message ) {
-						ta.append( "guyue(+_+): " + message + "\n" );
-						System.out.println("onMessage(String) @ : " + System.currentTimeMillis()); 
-						ta.setCaretPosition( ta.getDocument().getLength() );
-						if(message.contains(".")){
-							mRecevFileName = message;
-						}
-					}
-					  @Override
-					public void onMessage( ByteBuffer s) {
-						System.out.println("onMessage(ByteBuffer) @ : " + System.currentTimeMillis()); 
-						System.out.println("media received " + mSavePath + mRecevFileName);
-						
-						if(mRecevFileName.equals("file")){
-							mRecevFileName += "_" + UUID.randomUUID().toString();
-						}
-						ChatUtils.byte2image(s.array(),mSavePath + mRecevFileName);
-            
-					}
-					@Override
-					public void onOpen( ServerHandshake handshake ) {
-						ta.append( "You are connected to ChatServer: " + getURI() + "\n" );
-						ta.setCaretPosition( ta.getDocument().getLength() );
-						attatch.setEnabled(true);
-					}
-
-					@Override
-					public void onClose( int code, String reason, boolean remote ) {
-						ta.append( "You have been disconnected from: " + getURI() + "; Code: " + code + " " + reason + "\n" );
-						ta.setCaretPosition( ta.getDocument().getLength() );
-						connect.setEnabled( true );
-						uriField.setEditable( true );
-						draft.setEditable( true );
-						close.setEnabled( false );
-						attatch.setEnabled(false);
-					}
-
-					@Override
-					public void onError( Exception ex ) {
-						ta.append( "Exception occured ...\n" + ex + "\n" );
-						ta.setCaretPosition( ta.getDocument().getLength() );
-						ex.printStackTrace();
-						connect.setEnabled( true );
-						uriField.setEditable( true );
-						draft.setEditable( true );
-						close.setEnabled( false );
-					}
-				};
-
-				close.setEnabled( true );
-				connect.setEnabled( false );
-				uriField.setEditable( false );
-				draft.setEditable( false );
-				cc.setConnectionLostTimeout( 0 );
-				cc.connect();
-			} catch ( URISyntaxException ex ) {
-				ta.append( uriField.getText() + " is not a valid WebSocket URI\n" );
-			}
-		} else if( e.getSource() == close ) {
-			cc.close();
-		}else if( e.getSource() == attatch ) {
+		} //else if( e.getSource() == connect ) {
+			//chat();}
+//		else if( e.getSource() == close ) {
+//			cc.close();}
+		else if( e.getSource() == attatch ) {
 			// TODO Auto-generated method stub
 			JFileChooser jfc=new JFileChooser();
 			jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
@@ -223,7 +246,6 @@ public class ChatClient extends JFrame implements ActionListener {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-					  
 						cc.send(ChatUtils.image2byte(file.getAbsolutePath()));
 					}
 				}).start();

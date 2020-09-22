@@ -89,11 +89,12 @@ public class ChatServer extends WebSocketServer {
 	public void onMessage( WebSocket conn, ByteBuffer message ) {
         final ByteBuffer bb = message;
         final String name = mFileName;
+		broadcast(name);
+		System.out.println("message length " + message.capacity());
         new Thread(new Runnable() {
             @Override
             public void run() {
 				//System.out.println("saving to " + "assets/" + name + " -> " + bb.array().length/1024/1024 + "MB");
-                broadcast(name);
                 byte[] array = bb.array();
                 //byte2image(array,"../app/assets/" + name);
                 broadcast(array);

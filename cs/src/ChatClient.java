@@ -36,12 +36,15 @@ import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.TimerTask;
+import java.util.Timer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import java.text.SimpleDateFormat;
 
 import java.io.File;
 import javax.swing.JLabel;
@@ -55,22 +58,22 @@ import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class ChatClient extends JFrame implements ActionListener {
-	private static final long serialVersionUID = -6056260699202978657L;
+	private static  long serialVersionUID = -6056260699202978657L;
 	public static boolean deploy = ChatUtils.DEPLOY;
-	private final JTextField uriField;
-//	private final JButton connect;
-//	private final JButton close;
-	private final JButton attatch;
-	private final JTextArea ta;
-	private final JTextField chatField;
-	private final JComboBox draft;
-	private WebSocketClient cc;
-	private String mRecevFileName = "file";
-	 private boolean mIsSendFile = false;
-	private static final String mSavePath = "assets/client_";
+	static JTextField uriField;
+	static JButton attatch;
+	static JTextArea ta;
+	static JTextField chatField;
+	static JComboBox draft;
+	static WebSocketClient cc;
+	static String mRecevFileName = "file";
+	static boolean mIsSendFile = false;
+	static String mSavePath = "assets/client_";
 	static String serverAddr = ChatUtils.SERVER_ADDR;
 	static int serverPort = ChatUtils.SERVER_DEPLOY_PORT;
 	// private static final String mSavePath = "D:\\Documents\\Downloads\\";
+	static ConnectionTask task;
+	static Timer t;
 
 	public ChatClient( String defaultlocation ) {
 		super( "WebSocket Chat Client" );
@@ -89,15 +92,6 @@ public class ChatClient extends JFrame implements ActionListener {
 		uriField.setText( defaultlocation );
 		c.add( uriField );
 
-//		connect = new JButton( "Connect" );
-//		connect.addActionListener( this );
-//		c.add( connect );
-
-//		close = new JButton( "Close" );
-//		close.addActionListener( this );
-//		close.setEnabled( false );
-//		c.add( close );
-
 		JScrollPane scroll = new JScrollPane();
 		ta = new JTextArea();
 		scroll.setViewportView( ta );
@@ -112,8 +106,6 @@ public class ChatClient extends JFrame implements ActionListener {
 		attatch.addActionListener( this );
 		attatch.setEnabled( false );
 		c.add( attatch);
-		
-		
 
 		java.awt.Dimension d = new java.awt.Dimension( 300, 400 );
 		setPreferredSize( d );
@@ -125,7 +117,10 @@ public class ChatClient extends JFrame implements ActionListener {
 				if( cc != null ) {
 					cc.close();
 				}
+//				task.cancel();
+				t.cancel();
 				dispose();
+//				System.exit(0);
 			}
 		} );
 
@@ -133,7 +128,7 @@ public class ChatClient extends JFrame implements ActionListener {
 		setVisible( true );
 		chat();
 	}
-	public void chat(){
+	public static void chat(){
 		try {
 			// cc = new ChatClient(new URI(uriField.getText()), area, ( Draft ) draft.getSelectedItem() );
 			Map<String,String> header = new HashMap<>();
@@ -153,7 +148,7 @@ public class ChatClient extends JFrame implements ActionListener {
 				public void onMessage( ByteBuffer s) {
 					System.out.println("onMessage(ByteBuffer) @ : " + System.currentTimeMillis());
 					System.out.println("media received " + mSavePath + mRecevFileName);
-//					ta.append( ChatUtils.getStringByFormat(new Date(),ChatUtils.DEFYMDHMS) + " @ guyue(+_+): " +   mRecevFileName + "\n" );
+					//ta.append( ChatUtils.getStringByFormat(new Date(),ChatUtils.DEFYMDHMS) + " @ guyue(+_+): " +   mRecevFileName + "\n" );
 					if(mRecevFileName.equals("file")){
 						mRecevFileName += "_" + UUID.randomUUID().toString();
 					}
@@ -171,10 +166,8 @@ public class ChatClient extends JFrame implements ActionListener {
 				public void onClose( int code, String reason, boolean remote ) {
 					ta.append( "You have been disconnected from: " + getURI() + "; Code: " + code + " " + reason + "\n" );
 					ta.setCaretPosition( ta.getDocument().getLength() );
-//					connect.setEnabled( true );
 					uriField.setEditable( true );
 					draft.setEditable( true );
-//					close.setEnabled( false );
 					attatch.setEnabled(false);
 				}
 
@@ -183,15 +176,11 @@ public class ChatClient extends JFrame implements ActionListener {
 					ta.append( "Exception occured ...\n" + ex + "\n" );
 					ta.setCaretPosition( ta.getDocument().getLength() );
 					ex.printStackTrace();
-//					connect.setEnabled( true );
 					uriField.setEditable( true );
 					draft.setEditable( true );
-//					close.setEnabled( false );
 				}
 			};
 
-//			close.setEnabled( true );
-//			connect.setEnabled( false );
 			uriField.setEditable( false );
 			draft.setEditable( false );
 			cc.setConnectionLostTimeout( 0 );
@@ -200,37 +189,15 @@ public class ChatClient extends JFrame implements ActionListener {
 			ta.append( uriField.getText() + " is not a valid WebSocket URI\n" );
 		}
 	}
+
 	public void actionPerformed( ActionEvent e ){
 		if( e.getSource() == chatField ) {
 			if(cc != null){
-				if(cc.isOpen()){
-					cc.send(chatField.getText());
-				}else {
-					cc.reconnect();
-					cc.send(chatField.getText());
-				}
+				cc.send(chatField.getText());
 				chatField.setText( "" );
 				chatField.requestFocus();
-			}else {
-				chat();
 			}
-
-//			if( cc != null ) {
-//				System.out.print("cc non null");
-//				if (!cc.isOpen() ){
-//					cc.reconnect();
-//				}
-//				cc.send( chatField.getText() );
-//				chatField.setText( "" );
-//				chatField.requestFocus();
-//			}else{
-//				System.out.print("cc null");
-//			}
-
-		} //else if( e.getSource() == connect ) {
-			//chat();}
-//		else if( e.getSource() == close ) {
-//			cc.close();}
+		}
 		else if( e.getSource() == attatch ) {
 			// TODO Auto-generated method stub
 			JFileChooser jfc=new JFileChooser();
@@ -252,7 +219,23 @@ public class ChatClient extends JFrame implements ActionListener {
 			}
 		}
 	}
+	public static class ConnectionTask extends TimerTask
+	{
+		@Override
+		public void run()
+		{
+			if(cc != null){
+				if(!cc.isOpen()){
+					System.out.println("cc reconnect");
+					cc.reconnect();
+				}
+			}else {
+				System.out.println("cc is null");
+				chat();
+			}
+		}
 
+	}
 	public static void main( String[] args ) {
 		if(deploy == false) {
 			serverAddr = ChatUtils.SERVER_TEST_ADDR;
@@ -260,6 +243,9 @@ public class ChatClient extends JFrame implements ActionListener {
 		}
 		System.out.println( "Default server url not specified: defaulting to \'" + ChatUtils.SERVER_PROTOCOL + serverAddr + ":" + serverPort + "\'" );
 		new ChatClient( ChatUtils.SERVER_PROTOCOL + serverAddr + ":" + serverPort);
-	}
 
+		t = new Timer();
+		task = new ConnectionTask();
+		t.schedule(task, 1000,5000);
+	}
 }

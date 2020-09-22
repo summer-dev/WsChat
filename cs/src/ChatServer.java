@@ -168,6 +168,9 @@ public class ChatServer extends WebSocketServer {
 		}
 		ChatServer s = new ChatServer();
 		s.setConnectionLostTimeout( 0 );
+
+//		Enable SO_REUSEADDR for the websocket server
+		s.setReuseAddr( true );
 		s.start();
 		System.out.println( "ChatServer started on port: " + s.getPort() );
 

@@ -183,6 +183,7 @@ public class ChatClient extends JFrame implements ActionListener {
 
 			uriField.setEditable( false );
 			draft.setEditable( false );
+			cc.setReuseAddr( true );
 			cc.setConnectionLostTimeout( 0 );
 			cc.connect();
 		} catch ( URISyntaxException ex ) {
